@@ -1,0 +1,16 @@
+@import "tailwindcss";
+
+@theme {
+  --color-school-blue: #1e3a5f;
+  --color-school-gold: #c9a84c;
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
