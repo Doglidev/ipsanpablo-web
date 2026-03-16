@@ -36,3 +36,5 @@ export interface VideoData {
 export interface BlockContent {
   blocks: ContentBlock[]
 }
+
+export type ActionResult = { success: true } | { success: false; error: string }

@@ -6,7 +6,8 @@
       "Bash(ls:*)",
       "Bash(node:*)",
       "Bash(npx tsc:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "WebFetch(domain:ipsanpablo.com)"
     ]
   }
 }
