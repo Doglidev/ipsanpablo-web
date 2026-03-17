@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { prisma } from '@/lib/prisma'
 import BlockRenderer from '@/components/public/BlockRenderer'
 import SectionHero from '@/components/public/SectionHero'
+import NivelesCarousel from '@/components/public/NivelesCarousel'
 
 export const revalidate = 60
 
@@ -12,9 +13,14 @@ export const metadata: Metadata = {
 }
 
 const NuestraEscuelaPage = async () => {
-  const section = await prisma.section.findUnique({
-    where: { slug: 'nuestra-escuela' },
-  })
+  const [section, images] = await Promise.all([
+    prisma.section.findUnique({ where: { slug: 'nuestra-escuela' } }),
+    prisma.galleryImage.findMany({
+      where: { album: 'institucional-nuestra-escuela' },
+      orderBy: [{ sortOrder: 'asc' }, { uploadedAt: 'desc' }],
+      select: { id: true, url: true, caption: true },
+    }),
+  ])
 
   if (!section || !section.isVisible) notFound()
 
@@ -30,6 +36,7 @@ const NuestraEscuelaPage = async () => {
       />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
         <BlockRenderer content={section.content} />
+        <NivelesCarousel images={images} title="Galería" />
       </div>
     </div>
   )

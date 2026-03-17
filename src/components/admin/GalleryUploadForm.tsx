@@ -5,18 +5,36 @@ import Image from 'next/image'
 import { uploadGalleryImage } from '@/lib/actions/gallery'
 
 interface GalleryUploadFormProps {
-  albums: string[]
+  album: string
 }
 
-const GalleryUploadForm = ({ albums }: GalleryUploadFormProps) => {
+const GalleryUploadForm = ({ album }: GalleryUploadFormProps) => {
   const [isPending, startTransition] = useTransition()
   const [preview, setPreview] = useState<string | null>(null)
   const [result, setResult] = useState<{ success: boolean; error?: string } | null>(null)
+  const [isDragging, setIsDragging] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  const setFile = (file: File) => {
+    if (!inputRef.current) return
+    const dt = new DataTransfer()
+    dt.items.add(file)
+    inputRef.current.files = dt.files
+    setPreview(URL.createObjectURL(file))
+    setResult(null)
+  }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (file) setPreview(URL.createObjectURL(file))
+    if (file) setFile(file)
+  }
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(false)
+    const file = e.dataTransfer.files?.[0]
+    if (file) setFile(file)
   }
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -34,91 +52,66 @@ const GalleryUploadForm = ({ albums }: GalleryUploadFormProps) => {
   }
 
   return (
-    <div className="bg-white rounded-xl border p-5">
-      <h2 className="text-sm font-semibold text-gray-700 mb-4">Subir imagen</h2>
+    <div className="rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 p-4">
+      <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Subir imagen</p>
       <form ref={formRef} onSubmit={handleSubmit}>
+        <input type="hidden" name="album" value={album} />
         <div className="flex flex-col sm:flex-row gap-4">
-          {/* File drop zone */}
-          <label className="relative flex-shrink-0 w-full sm:w-40 h-32 rounded-xl border-2 border-dashed border-gray-200 hover:border-school-blue cursor-pointer overflow-hidden transition-colors">
+          {/* Drop zone */}
+          <label
+            className={`relative flex-shrink-0 w-full sm:w-36 h-28 rounded-xl border-2 border-dashed cursor-pointer overflow-hidden transition-colors ${
+              isDragging
+                ? 'border-school-blue bg-blue-50'
+                : 'border-gray-300 hover:border-school-blue'
+            }`}
+            onDragOver={(e) => { e.preventDefault(); setIsDragging(true) }}
+            onDragLeave={() => setIsDragging(false)}
+            onDrop={handleDrop}
+          >
             {preview ? (
-              <Image src={preview} alt="Preview" fill className="object-cover" />
+              <Image src={preview} alt="Preview" fill className="object-cover rounded-xl" />
             ) : (
-              <div className="flex flex-col items-center justify-center h-full text-gray-400 gap-2">
-                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="flex flex-col items-center justify-center h-full text-gray-400 gap-1 pointer-events-none">
+                <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                     d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                <span className="text-xs">Seleccionar</span>
+                <span className="text-xs text-center leading-tight px-2">
+                  Arrastrá o<br />hacé click
+                </span>
               </div>
             )}
             <input
+              ref={inputRef}
               name="file"
               type="file"
-              accept="image/*"
+              accept="image/jpeg,image/png,image/webp"
               required
               className="absolute inset-0 opacity-0 cursor-pointer"
               onChange={handleFileChange}
             />
           </label>
 
-          {/* Metadata */}
-          <div className="flex-1 space-y-3">
-            <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
-                Álbum <span className="text-red-500">*</span>
-              </label>
-              <input
-                name="album"
-                required
-                list="albums-list"
-                className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-school-blue"
-                placeholder="ej: actos-2026, pastoral, egresados"
-              />
-              <datalist id="albums-list">
-                {albums.map((a) => <option key={a} value={a} />)}
-              </datalist>
-              <p className="text-xs text-gray-400 mt-1">Escribí un álbum existente o uno nuevo.</p>
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
-                Categoría <span className="text-red-500">*</span>
-              </label>
-              <select
-                name="category"
-                required
-                className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-school-blue"
-              >
-                <option value="institucional">Institucional</option>
-                <option value="pastoral-info-general">Pastoral — Info General</option>
-                <option value="pastoral-galeria">Pastoral — Galería</option>
-                <option value="nivel-inicial">Nivel Inicial</option>
-                <option value="nivel-primario">Nivel Primario</option>
-                <option value="nivel-secundario">Nivel Secundario</option>
-                <option value="pasantias-lugares">Pasantías — Lugares</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
-                Descripción (opcional)
-              </label>
-              <input
-                name="caption"
-                className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-school-blue"
-                placeholder="Ej: Acto de cierre 2026"
-                maxLength={200}
-              />
-            </div>
+          {/* Caption + actions */}
+          <div className="flex-1 flex flex-col gap-2 justify-center">
+            <input
+              name="caption"
+              className="w-full border rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-school-blue"
+              placeholder="Descripción (opcional)"
+              maxLength={200}
+            />
+            <p className="text-xs text-gray-400">JPG, PNG, WEBP · Máx. 5 MB</p>
             <div className="flex items-center gap-3">
               <button
                 type="submit"
                 disabled={isPending}
-                className="bg-school-blue text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-blue-900 disabled:opacity-50 transition-colors"
+                className="bg-school-blue text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-900 disabled:opacity-50 transition-colors"
               >
                 {isPending ? 'Subiendo...' : 'Subir imagen'}
               </button>
               {result && (
                 <span className={`text-sm font-medium ${result.success ? 'text-green-600' : 'text-red-600'}`}>
-                  {result.success ? '✓ Imagen subida' : `✗ ${result.error}`}
+                  {result.success ? '✓ Subida correctamente' : `✗ ${result.error}`}
                 </span>
               )}
             </div>

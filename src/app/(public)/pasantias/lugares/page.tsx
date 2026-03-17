@@ -16,7 +16,7 @@ const LugaresPasantiasPage = async () => {
   const [section, images] = await Promise.all([
     prisma.section.findUnique({ where: { slug: 'pasantias-lugares' } }),
     prisma.galleryImage.findMany({
-      where: { category: 'pasantias-lugares' },
+      where: { album: 'pasantias-lugares' },
       orderBy: [{ sortOrder: 'asc' }, { uploadedAt: 'desc' }],
       select: { id: true, url: true, caption: true },
     }),

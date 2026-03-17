@@ -6,28 +6,35 @@ import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 import { uploadToCloudinary, deleteFromCloudinary } from '@/lib/cloudinary'
+import { VALID_ALBUMS } from '@/lib/gallery-sections'
 import type { ActionResult } from '@/types'
 
-const VALID_CATEGORIES = [
-  'institucional',
-  'pastoral-info-general',
-  'pastoral-galeria',
-  'nivel-inicial',
-  'nivel-primario',
-  'nivel-secundario',
-  'pasantias-lugares',
-] as const
-
-const imageMetaSchema = z.object({
+const uploadSchema = z.object({
   caption: z.string().max(200).optional(),
-  album: z.string().min(1, 'El álbum es requerido').max(80),
-  category: z.enum(VALID_CATEGORIES).default('institucional'),
+  album: z.enum(VALID_ALBUMS),
+})
+
+const updateSchema = z.object({
+  caption: z.string().max(200).optional(),
+  album: z.enum(VALID_ALBUMS),
 })
 
 async function requireSession() {
   const session = await getServerSession(authOptions)
   if (!session) throw new Error('No autorizado')
   return session
+}
+
+function revalidateAll() {
+  revalidatePath('/admin/galeria')
+  revalidatePath('/institucional/nuestra-escuela')
+  revalidatePath('/institucional/galeria')
+  revalidatePath('/niveles/inicial')
+  revalidatePath('/niveles/primario')
+  revalidatePath('/niveles/secundario')
+  revalidatePath('/pastoral/info')
+  revalidatePath('/pastoral/galeria')
+  revalidatePath('/pasantias/lugares')
 }
 
 export async function uploadGalleryImage(formData: FormData): Promise<ActionResult> {
@@ -43,14 +50,13 @@ export async function uploadGalleryImage(formData: FormData): Promise<ActionResu
       return { success: false, error: 'El archivo debe ser una imagen' }
     }
 
-    if (file.size > 10 * 1024 * 1024) {
-      return { success: false, error: 'La imagen no puede superar los 10 MB' }
+    if (file.size > 5 * 1024 * 1024) {
+      return { success: false, error: 'La imagen no puede superar los 5 MB' }
     }
 
-    const meta = imageMetaSchema.safeParse({
-      caption: formData.get('caption') ?? undefined,
+    const meta = uploadSchema.safeParse({
+      caption: formData.get('caption') || undefined,
       album: formData.get('album') ?? '',
-      category: formData.get('category') ?? 'institucional',
     })
     if (!meta.success) {
       return { success: false, error: meta.error.issues[0].message }
@@ -66,18 +72,11 @@ export async function uploadGalleryImage(formData: FormData): Promise<ActionResu
         publicId,
         caption: meta.data.caption ?? null,
         album: meta.data.album,
-        category: meta.data.category,
+        category: meta.data.album,
       },
     })
 
-    revalidatePath('/admin/galeria')
-    revalidatePath('/institucional/galeria')
-    revalidatePath('/niveles/inicial')
-    revalidatePath('/niveles/primario')
-    revalidatePath('/niveles/secundario')
-    revalidatePath('/pastoral/info')
-    revalidatePath('/pastoral/galeria')
-    revalidatePath('/pasantias/lugares')
+    revalidateAll()
     return { success: true }
   } catch (e) {
     if (e instanceof Error && e.message === 'No autorizado') {
@@ -90,12 +89,12 @@ export async function uploadGalleryImage(formData: FormData): Promise<ActionResu
 
 export async function updateGalleryImage(
   id: string,
-  data: { caption?: string; album: string; category: string }
+  data: { caption?: string; album: string }
 ): Promise<ActionResult> {
   try {
     await requireSession()
 
-    const parsed = imageMetaSchema.safeParse(data)
+    const parsed = updateSchema.safeParse(data)
     if (!parsed.success) {
       return { success: false, error: parsed.error.issues[0].message }
     }
@@ -105,18 +104,11 @@ export async function updateGalleryImage(
       data: {
         caption: parsed.data.caption ?? null,
         album: parsed.data.album,
-        category: parsed.data.category,
+        category: parsed.data.album,
       },
     })
 
-    revalidatePath('/admin/galeria')
-    revalidatePath('/institucional/galeria')
-    revalidatePath('/niveles/inicial')
-    revalidatePath('/niveles/primario')
-    revalidatePath('/niveles/secundario')
-    revalidatePath('/pastoral/info')
-    revalidatePath('/pastoral/galeria')
-    revalidatePath('/pasantias/lugares')
+    revalidateAll()
     return { success: true }
   } catch (e) {
     if (e instanceof Error && e.message === 'No autorizado') {
@@ -136,8 +128,7 @@ export async function deleteGalleryImage(id: string): Promise<ActionResult> {
     await deleteFromCloudinary(image.publicId)
     await prisma.galleryImage.delete({ where: { id } })
 
-    revalidatePath('/admin/galeria')
-    revalidatePath('/institucional/galeria')
+    revalidateAll()
     return { success: true }
   } catch (e) {
     if (e instanceof Error && e.message === 'No autorizado') {

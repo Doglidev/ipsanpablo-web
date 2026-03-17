@@ -16,7 +16,7 @@ const PastoralPage = async () => {
   const [section, images] = await Promise.all([
     prisma.section.findUnique({ where: { slug: 'pastoral-info' } }),
     prisma.galleryImage.findMany({
-      where: { category: 'pastoral-info-general' },
+      where: { album: 'pastoral-info' },
       orderBy: [{ sortOrder: 'asc' }, { uploadedAt: 'desc' }],
       select: { id: true, url: true, caption: true },
     }),

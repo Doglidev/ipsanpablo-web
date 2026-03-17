@@ -3,32 +3,21 @@
 import { useState, useTransition } from 'react'
 import Image from 'next/image'
 import { updateGalleryImage, deleteGalleryImage } from '@/lib/actions/gallery'
-
-const CATEGORY_LABELS: Record<string, string> = {
-  'institucional': 'Institucional',
-  'pastoral-info-general': 'Pastoral — Info General',
-  'pastoral-galeria': 'Pastoral — Galería',
-  'nivel-inicial': 'Nivel Inicial',
-  'nivel-primario': 'Nivel Primario',
-  'nivel-secundario': 'Nivel Secundario',
-  'pasantias-lugares': 'Pasantías — Lugares',
-}
+import { GALLERY_SECTIONS } from '@/lib/gallery-sections'
 
 interface GalleryImageCardProps {
   id: string
   url: string
   caption: string | null
   album: string
-  category: string
 }
 
-const GalleryImageCard = ({ id, url, caption, album, category }: GalleryImageCardProps) => {
+const GalleryImageCard = ({ id, url, caption, album }: GalleryImageCardProps) => {
   const [isPendingDelete, startDeleteTransition] = useTransition()
   const [isPendingSave, startSaveTransition] = useTransition()
   const [editing, setEditing] = useState(false)
   const [editCaption, setEditCaption] = useState(caption ?? '')
   const [editAlbum, setEditAlbum] = useState(album)
-  const [editCategory, setEditCategory] = useState(category)
   const [error, setError] = useState<string | null>(null)
 
   const handleDelete = () => {
@@ -41,11 +30,11 @@ const GalleryImageCard = ({ id, url, caption, album, category }: GalleryImageCar
   const handleSave = () => {
     setError(null)
     startSaveTransition(async () => {
-      const res = await updateGalleryImage(id, { caption: editCaption, album: editAlbum, category: editCategory })
+      const res = await updateGalleryImage(id, { caption: editCaption, album: editAlbum })
       if (res.success) {
         setEditing(false)
       } else {
-        setError(res.error)
+        setError(res.error ?? 'Error desconocido')
       }
     })
   }
@@ -61,7 +50,7 @@ const GalleryImageCard = ({ id, url, caption, album, category }: GalleryImageCar
           className="object-cover"
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
         />
-        {/* Hover overlay */}
+        {/* Hover actions */}
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
           <button
             onClick={() => setEditing(true)}
@@ -87,51 +76,39 @@ const GalleryImageCard = ({ id, url, caption, album, category }: GalleryImageCar
         </div>
       </div>
 
-      {/* Info */}
-      <div className="px-3 py-2 space-y-1">
-        <div className="flex flex-wrap gap-1">
-          <span className="text-xs font-medium text-school-blue bg-blue-50 px-1.5 py-0.5 rounded">
-            {album}
-          </span>
-          <span className="text-xs font-medium text-white bg-school-gold px-1.5 py-0.5 rounded">
-            {CATEGORY_LABELS[category] ?? category}
-          </span>
-        </div>
-        {caption && (
+      {/* Caption preview */}
+      {caption && (
+        <div className="px-2 py-1.5">
           <p className="text-xs text-gray-500 truncate">{caption}</p>
-        )}
-      </div>
+        </div>
+      )}
 
-      {/* Edit modal */}
+      {/* Edit overlay */}
       {editing && (
-        <div className="absolute inset-0 bg-white p-3 flex flex-col gap-2 z-10">
+        <div className="absolute inset-0 bg-white p-3 flex flex-col gap-2 z-10 overflow-y-auto">
           <p className="text-xs font-semibold text-gray-700">Editar imagen</p>
-          <input
-            className="border rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-school-blue"
-            value={editAlbum}
-            onChange={(e) => setEditAlbum(e.target.value)}
-            placeholder="Álbum"
-          />
-          <select
-            className="border rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-school-blue"
-            value={editCategory}
-            onChange={(e) => setEditCategory(e.target.value)}
-          >
-            <option value="institucional">Institucional</option>
-            <option value="pastoral-info-general">Pastoral — Info General</option>
-            <option value="pastoral-galeria">Pastoral — Galería</option>
-            <option value="nivel-inicial">Nivel Inicial</option>
-            <option value="nivel-primario">Nivel Primario</option>
-            <option value="nivel-secundario">Nivel Secundario</option>
-            <option value="pasantias-lugares">Pasantías — Lugares</option>
-          </select>
-          <input
-            className="border rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-school-blue"
-            value={editCaption}
-            onChange={(e) => setEditCaption(e.target.value)}
-            placeholder="Descripción"
-            maxLength={200}
-          />
+          <div>
+            <label className="text-xs text-gray-500 mb-0.5 block">Mover a sección</label>
+            <select
+              className="w-full border rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-school-blue"
+              value={editAlbum}
+              onChange={(e) => setEditAlbum(e.target.value)}
+            >
+              {GALLERY_SECTIONS.map((s) => (
+                <option key={s.album} value={s.album}>{s.label}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="text-xs text-gray-500 mb-0.5 block">Descripción</label>
+            <input
+              className="w-full border rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-school-blue"
+              value={editCaption}
+              onChange={(e) => setEditCaption(e.target.value)}
+              placeholder="Descripción (opcional)"
+              maxLength={200}
+            />
+          </div>
           {error && <p className="text-xs text-red-600">{error}</p>}
           <div className="flex gap-2 mt-auto">
             <button

@@ -17,7 +17,7 @@ const NivelInicialPage = async () => {
   const [section, images] = await Promise.all([
     prisma.section.findUnique({ where: { slug: 'nivel-inicial' } }),
     prisma.galleryImage.findMany({
-      where: { category: 'nivel-inicial' },
+      where: { album: 'niveles-inicial' },
       orderBy: [{ sortOrder: 'asc' }, { uploadedAt: 'desc' }],
       select: { id: true, url: true, caption: true },
     }),

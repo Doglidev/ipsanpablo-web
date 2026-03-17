@@ -17,7 +17,7 @@ const NivelSecundarioPage = async () => {
   const [section, images] = await Promise.all([
     prisma.section.findUnique({ where: { slug: 'nivel-secundario' } }),
     prisma.galleryImage.findMany({
-      where: { category: 'nivel-secundario' },
+      where: { album: 'niveles-secundario' },
       orderBy: [{ sortOrder: 'asc' }, { uploadedAt: 'desc' }],
       select: { id: true, url: true, caption: true },
     }),
