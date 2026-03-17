@@ -10,7 +10,8 @@
       "WebFetch(domain:ipsanpablo.com)",
       "Bash(npx ts-node:*)",
       "Bash(cd:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(git commit:*)"
     ]
   }
 }

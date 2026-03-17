@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useTransition, useCallback } from 'react'
+import { useState, useTransition, useCallback, useRef } from 'react'
 import type { ContentBlock, HeadingData, ParagraphData, ImageData, ListData, VideoData, PartnersData } from '@/types'
+import { uploadBlockImage } from '@/lib/actions/upload-block-image'
 
 interface BlockEditorProps {
   initialContent: string
@@ -243,37 +244,7 @@ const BlockFields = ({ block, onChange }: BlockFieldsProps) => {
 
     case 'image': {
       const data = block.data as ImageData
-      return (
-        <div className="space-y-2">
-          <div>
-            <label className={labelClass}>URL de la imagen</label>
-            <input
-              className={inputClass}
-              value={data.url}
-              onChange={(e) => onChange({ ...data, url: e.target.value })}
-              placeholder="https://res.cloudinary.com/..."
-            />
-          </div>
-          <div>
-            <label className={labelClass}>Texto alternativo (alt)</label>
-            <input
-              className={inputClass}
-              value={data.alt}
-              onChange={(e) => onChange({ ...data, alt: e.target.value })}
-              placeholder="Descripción de la imagen..."
-            />
-          </div>
-          <div>
-            <label className={labelClass}>Pie de foto (opcional)</label>
-            <input
-              className={inputClass}
-              value={data.caption ?? ''}
-              onChange={(e) => onChange({ ...data, caption: e.target.value })}
-              placeholder="Pie de foto..."
-            />
-          </div>
-        </div>
-      )
+      return <ImageBlockFields data={data} onChange={onChange} />
     }
 
     case 'list': {
@@ -366,9 +337,251 @@ const BlockFields = ({ block, onChange }: BlockFieldsProps) => {
       )
     }
 
+    case 'partners': {
+      const data = block.data as PartnersData
+      return <PartnersBlockFields data={data} onChange={onChange} />
+    }
+
     default:
       return null
   }
+}
+
+// ── Image block with direct upload ─────────────────────────────────────────
+
+interface ImageBlockFieldsProps {
+  data: ImageData
+  onChange: (data: ContentBlock['data']) => void
+}
+
+const ImageBlockFields = ({ data, onChange }: ImageBlockFieldsProps) => {
+  const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    setUploadError(null)
+    const formData = new FormData()
+    formData.append('file', file)
+    const result = await uploadBlockImage(formData)
+    setUploading(false)
+    if (result.success) {
+      onChange({ ...data, url: result.url })
+    } else {
+      setUploadError(result.error)
+    }
+    // reset input so same file can be re-selected if needed
+    if (fileRef.current) fileRef.current.value = ''
+  }
+
+  return (
+    <div className="space-y-2">
+      <div>
+        <label className={labelClass}>Imagen</label>
+        <div className="flex gap-2 items-center">
+          <input
+            className={`${inputClass} flex-1`}
+            value={data.url}
+            onChange={(e) => onChange({ ...data, url: e.target.value })}
+            placeholder="URL de la imagen..."
+            readOnly={uploading}
+          />
+          <button
+            type="button"
+            onClick={() => fileRef.current?.click()}
+            disabled={uploading}
+            className="shrink-0 px-3 py-2 text-sm rounded-lg border border-school-blue text-school-blue hover:bg-school-blue hover:text-white disabled:opacity-50 transition-colors"
+          >
+            {uploading ? 'Subiendo...' : 'Subir imagen'}
+          </button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleFileChange}
+          />
+        </div>
+        {uploadError && <p className="text-xs text-red-500 mt-1">{uploadError}</p>}
+        {data.url && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={data.url} alt="preview" className="mt-2 rounded-lg max-h-40 object-contain border" />
+        )}
+      </div>
+      <div>
+        <label className={labelClass}>Tamaño</label>
+        <select
+          className={inputClass}
+          value={data.size ?? 'full'}
+          onChange={(e) => onChange({ ...data, size: e.target.value as ImageData['size'] })}
+        >
+          <option value="full">Ancho completo</option>
+          <option value="medium">Mediano (centrado)</option>
+          <option value="small">Pequeño (flota a la derecha)</option>
+        </select>
+      </div>
+      <div>
+        <label className={labelClass}>Texto alternativo (alt)</label>
+        <input
+          className={inputClass}
+          value={data.alt}
+          onChange={(e) => onChange({ ...data, alt: e.target.value })}
+          placeholder="Descripción de la imagen..."
+        />
+      </div>
+      <div>
+        <label className={labelClass}>Pie de foto (opcional)</label>
+        <input
+          className={inputClass}
+          value={data.caption ?? ''}
+          onChange={(e) => onChange({ ...data, caption: e.target.value })}
+          placeholder="Pie de foto..."
+        />
+      </div>
+    </div>
+  )
+}
+
+// ── Partners block editor ───────────────────────────────────────────────────
+
+interface PartnersBlockFieldsProps {
+  data: PartnersData
+  onChange: (data: ContentBlock['data']) => void
+}
+
+const PartnersBlockFields = ({ data, onChange }: PartnersBlockFieldsProps) => {
+  const updateItem = (index: number, patch: Partial<PartnersData['items'][number]>) => {
+    const newItems = data.items.map((item, i) => (i === index ? { ...item, ...patch } : item))
+    onChange({ ...data, items: newItems })
+  }
+
+  const removeItem = (index: number) => {
+    const newItems = data.items.filter((_, i) => i !== index)
+    onChange({ ...data, items: newItems.length ? newItems : [{ name: '', imageUrl: '' }] })
+  }
+
+  return (
+    <div className="space-y-3">
+      <div>
+        <label className={labelClass}>Título del grupo (opcional)</label>
+        <input
+          className={inputClass}
+          value={data.heading ?? ''}
+          onChange={(e) => onChange({ ...data, heading: e.target.value })}
+          placeholder="Instituciones"
+        />
+      </div>
+      <div>
+        <label className={labelClass}>Instituciones</label>
+        <div className="space-y-2">
+          {data.items.map((item, i) => (
+            <PartnerItemRow
+              key={i}
+              item={item}
+              index={i}
+              onUpdate={(patch) => updateItem(i, patch)}
+              onRemove={() => removeItem(i)}
+            />
+          ))}
+        </div>
+        <button
+          type="button"
+          onClick={() => onChange({ ...data, items: [...data.items, { name: '', imageUrl: '' }] })}
+          className="mt-2 text-sm text-school-blue hover:text-school-gold font-medium"
+        >
+          + Añadir institución
+        </button>
+      </div>
+    </div>
+  )
+}
+
+interface PartnerItemRowProps {
+  item: PartnersData['items'][number]
+  index: number
+  onUpdate: (patch: Partial<PartnersData['items'][number]>) => void
+  onRemove: () => void
+}
+
+const PartnerItemRow = ({ item, index, onUpdate, onRemove }: PartnerItemRowProps) => {
+  const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    setUploadError(null)
+    const formData = new FormData()
+    formData.append('file', file)
+    const result = await uploadBlockImage(formData)
+    setUploading(false)
+    if (result.success) {
+      onUpdate({ imageUrl: result.url })
+    } else {
+      setUploadError(result.error)
+    }
+    if (fileRef.current) fileRef.current.value = ''
+  }
+
+  return (
+    <div className="flex gap-3 items-start bg-gray-50 rounded-lg p-3">
+      {/* Logo preview */}
+      <div
+        className="shrink-0 w-16 h-16 border rounded-lg bg-white flex items-center justify-center overflow-hidden cursor-pointer hover:border-school-blue transition-colors"
+        onClick={() => fileRef.current?.click()}
+        title="Clic para subir logo"
+      >
+        {item.imageUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={item.imageUrl} alt={item.name} className="w-full h-full object-contain p-1" />
+        ) : (
+          <div className="text-center text-gray-300">
+            <svg className="w-6 h-6 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <span className="text-[10px] mt-0.5 block">{uploading ? '...' : 'Logo'}</span>
+          </div>
+        )}
+        <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+      </div>
+
+      {/* Name + controls */}
+      <div className="flex-1 min-w-0">
+        <input
+          className={inputClass}
+          value={item.name}
+          onChange={(e) => onUpdate({ name: e.target.value })}
+          placeholder={`Institución ${index + 1}`}
+        />
+        {uploadError && <p className="text-xs text-red-500 mt-1">{uploadError}</p>}
+        <button
+          type="button"
+          onClick={() => fileRef.current?.click()}
+          disabled={uploading}
+          className="mt-1.5 text-xs text-school-blue hover:text-school-gold disabled:opacity-50 font-medium"
+        >
+          {uploading ? 'Subiendo...' : item.imageUrl ? 'Cambiar logo' : 'Subir logo'}
+        </button>
+      </div>
+
+      {/* Remove */}
+      <button
+        type="button"
+        onClick={onRemove}
+        className="shrink-0 text-gray-300 hover:text-red-500 pt-1 transition-colors"
+        title="Eliminar"
+      >
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+  )
 }
 
 export default BlockEditor
