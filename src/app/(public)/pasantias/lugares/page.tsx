@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma'
 import BlockRenderer from '@/components/public/BlockRenderer'
 import SectionHero from '@/components/public/SectionHero'
 
-export const revalidate = 60
+export const revalidate = 120
 
 export const metadata: Metadata = {
   title: 'Lugares de Pasantías | Instituto San Pablo Apóstol',
