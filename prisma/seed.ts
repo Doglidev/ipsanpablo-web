@@ -66,6 +66,7 @@ async function main() {
           { id: 'ne10', type: 'heading', data: { text: 'Comunidad Educativa', level: 2 } },
           { id: 'ne11', type: 'paragraph', data: { text: 'Se define por el reconocimiento y valoración de cada uno de sus miembros: alumnos, docentes y no docentes, directivos, padres y madres, personal administrativo, de limpieza, de seguridad y mantenimiento, quienes participan de un modo específico y particular de la misión y objetivos institucionales.' } },
           { id: 'ne12', type: 'heading', data: { text: 'Nuestro Patrono', level: 2 } },
+          { id: 'ne12b', type: 'image', data: { url: '', alt: 'San Pablo Apóstol', caption: 'San Pablo Apóstol', size: 'small' } },
           { id: 'ne13', type: 'paragraph', data: { text: 'Pablo se llamaba Saulo, nació en Tarso de Cilicia y era un perseguidor de los discípulos del Señor. La conversión de Saulo tuvo lugar hacia el año 36 y es uno de los hechos más importantes de la iglesia primitiva. Después de su conversión comienza a predicar ante diferentes comunidades, hablaba sobre el Reino de Dios y trataba de convencer a sus oyentes.' } },
           { id: 'ne14', type: 'paragraph', data: { text: 'Un modo de predicar fue a través de las diferentes cartas que envió a varias poblaciones, ya que era imposible su presencia en todas ellas. Algunas estaban dirigidas a comunidades como Efesios y Romanos, o a sus autoridades, otras a una persona determinada. Las cartas trataban temas de interés para toda la comunidad y pocas veces tenían un carácter íntimo o familiar.' } },
           { id: 'ne15', type: 'paragraph', data: { text: 'Las cartas paulinas tienen el valor de un testimonio inmediato sobre la vida, las dificultades y el crecimiento de las comunidades cristianas en el mundo pagano. En ellas se encuentra vivamente reflejada la personalidad de Pablo: su fe ardiente, su rica sensibilidad, su temperamento apasionado, su voluntad y especialmente su condición de APÓSTOL. Pablo arroja en cada página una nueva luz sobre el misterio de Cristo o de la iglesia.' } },
@@ -293,6 +294,15 @@ async function main() {
           { id: 'pl7', type: 'divider', data: {} },
           { id: 'pl8', type: 'paragraph', data: { text: 'La participación a las pasantías se abre a todos los alumnos del curso. Se realizan con anterioridad distintas propuestas pedagógicas tendientes a trabajar su marco legal, beneficios y la importancia para la vida de esta experiencia.' } },
           { id: 'pl9', type: 'paragraph', data: { text: 'Las fechas están otorgadas por las Instituciones y en todos los casos cuentan con una charla de inducción donde quedan aclaradas las condiciones a respetar por todas las partes.' } },
+          { id: 'pl_partners', type: 'partners', data: {
+            heading: 'Instituciones',
+            items: [
+              { name: 'Banco Macro', imageUrl: '' },
+              { name: 'Tarjeta Naranja', imageUrl: '' },
+              { name: 'JAEC', imageUrl: '' },
+              { name: 'IES Colegio Universitario', imageUrl: '' },
+            ],
+          } },
         ],
       }),
     },

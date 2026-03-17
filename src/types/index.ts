@@ -1,7 +1,7 @@
 export interface ContentBlock {
   id: string
-  type: 'heading' | 'paragraph' | 'image' | 'list' | 'divider' | 'video'
-  data: HeadingData | ParagraphData | ImageData | ListData | DividerData | VideoData
+  type: 'heading' | 'paragraph' | 'image' | 'list' | 'divider' | 'video' | 'partners'
+  data: HeadingData | ParagraphData | ImageData | ListData | DividerData | VideoData | PartnersData
 }
 
 export interface HeadingData {
@@ -17,6 +17,7 @@ export interface ImageData {
   url: string
   caption?: string
   alt: string
+  size?: 'small' | 'medium' | 'full'
 }
 
 export interface ListData {
@@ -31,6 +32,16 @@ export interface DividerData {
 export interface VideoData {
   url: string
   caption?: string
+}
+
+export interface PartnerItem {
+  name: string
+  imageUrl?: string
+}
+
+export interface PartnersData {
+  heading?: string
+  items: PartnerItem[]
 }
 
 export interface BlockContent {

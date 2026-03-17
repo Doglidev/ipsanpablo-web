@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition, useCallback } from 'react'
-import type { ContentBlock, HeadingData, ParagraphData, ImageData, ListData, VideoData } from '@/types'
+import type { ContentBlock, HeadingData, ParagraphData, ImageData, ListData, VideoData, PartnersData } from '@/types'
 
 interface BlockEditorProps {
   initialContent: string
@@ -18,6 +18,7 @@ const EMPTY_BLOCK_DATA: Record<ContentBlock['type'], ContentBlock['data']> = {
   list: { style: 'unordered', items: [''] } as ListData,
   divider: {} as Record<string, never>,
   video: { url: '', caption: '' } as VideoData,
+  partners: { heading: 'Instituciones', items: [{ name: '', imageUrl: '' }] } as PartnersData,
 }
 
 const BLOCK_LABELS: Record<ContentBlock['type'], string> = {
@@ -27,6 +28,7 @@ const BLOCK_LABELS: Record<ContentBlock['type'], string> = {
   list: 'Lista',
   divider: 'Separador',
   video: 'Video',
+  partners: 'Grid de Partners',
 }
 
 const BlockEditor = ({ initialContent, onSave, saveLabel = 'Guardar' }: BlockEditorProps) => {
