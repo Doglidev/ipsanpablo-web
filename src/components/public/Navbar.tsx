@@ -31,7 +31,7 @@ const NAV_LINKS = [
       { label: 'Objetivo', href: '/pasantias/objetivo' },
       { label: 'Espacios Curriculares', href: '/pasantias/espacios-curriculares' },
       { label: 'Lugares', href: '/pasantias/lugares' },
-      { label: 'Monitoreo', href: '/pasantias/monitoreo' },
+      { label: 'Monitoreo y Evaluación', href: '/pasantias/monitoreo' },
     ],
   },
   {

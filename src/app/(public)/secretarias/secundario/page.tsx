@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 }
 
 const SecretariaSecundarioPage = async () => {
-  const section = await prisma.section.findUnique({ where: { slug: 'secretarias-secundario' } })
+  const section = await prisma.section.findUnique({ where: { slug: 'secretaria-secundario' } })
   if (!section || !section.isVisible) notFound()
   return (
     <div>
