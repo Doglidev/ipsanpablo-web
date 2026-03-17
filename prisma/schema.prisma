@@ -22,6 +22,7 @@ model User {
 enum Role {
   ADMIN
   EDITOR
+  VIEWER
 }
 
 model Section {
@@ -43,6 +44,7 @@ model GalleryImage {
   publicId   String
   caption    String?
   album      String
+  category   String   @default("institucional")
   sortOrder  Int      @default(0)
   uploadedAt DateTime @default(now())
 }

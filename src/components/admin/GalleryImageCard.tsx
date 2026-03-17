@@ -4,19 +4,31 @@ import { useState, useTransition } from 'react'
 import Image from 'next/image'
 import { updateGalleryImage, deleteGalleryImage } from '@/lib/actions/gallery'
 
+const CATEGORY_LABELS: Record<string, string> = {
+  'institucional': 'Institucional',
+  'pastoral-info-general': 'Pastoral — Info General',
+  'pastoral-galeria': 'Pastoral — Galería',
+  'nivel-inicial': 'Nivel Inicial',
+  'nivel-primario': 'Nivel Primario',
+  'nivel-secundario': 'Nivel Secundario',
+  'pasantias-lugares': 'Pasantías — Lugares',
+}
+
 interface GalleryImageCardProps {
   id: string
   url: string
   caption: string | null
   album: string
+  category: string
 }
 
-const GalleryImageCard = ({ id, url, caption, album }: GalleryImageCardProps) => {
+const GalleryImageCard = ({ id, url, caption, album, category }: GalleryImageCardProps) => {
   const [isPendingDelete, startDeleteTransition] = useTransition()
   const [isPendingSave, startSaveTransition] = useTransition()
   const [editing, setEditing] = useState(false)
   const [editCaption, setEditCaption] = useState(caption ?? '')
   const [editAlbum, setEditAlbum] = useState(album)
+  const [editCategory, setEditCategory] = useState(category)
   const [error, setError] = useState<string | null>(null)
 
   const handleDelete = () => {
@@ -29,7 +41,7 @@ const GalleryImageCard = ({ id, url, caption, album }: GalleryImageCardProps) =>
   const handleSave = () => {
     setError(null)
     startSaveTransition(async () => {
-      const res = await updateGalleryImage(id, { caption: editCaption, album: editAlbum })
+      const res = await updateGalleryImage(id, { caption: editCaption, album: editAlbum, category: editCategory })
       if (res.success) {
         setEditing(false)
       } else {
@@ -76,12 +88,17 @@ const GalleryImageCard = ({ id, url, caption, album }: GalleryImageCardProps) =>
       </div>
 
       {/* Info */}
-      <div className="px-3 py-2">
-        <span className="text-xs font-medium text-school-blue bg-blue-50 px-1.5 py-0.5 rounded">
-          {album}
-        </span>
+      <div className="px-3 py-2 space-y-1">
+        <div className="flex flex-wrap gap-1">
+          <span className="text-xs font-medium text-school-blue bg-blue-50 px-1.5 py-0.5 rounded">
+            {album}
+          </span>
+          <span className="text-xs font-medium text-white bg-school-gold px-1.5 py-0.5 rounded">
+            {CATEGORY_LABELS[category] ?? category}
+          </span>
+        </div>
         {caption && (
-          <p className="text-xs text-gray-500 mt-1 truncate">{caption}</p>
+          <p className="text-xs text-gray-500 truncate">{caption}</p>
         )}
       </div>
 
@@ -95,6 +112,19 @@ const GalleryImageCard = ({ id, url, caption, album }: GalleryImageCardProps) =>
             onChange={(e) => setEditAlbum(e.target.value)}
             placeholder="Álbum"
           />
+          <select
+            className="border rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-school-blue"
+            value={editCategory}
+            onChange={(e) => setEditCategory(e.target.value)}
+          >
+            <option value="institucional">Institucional</option>
+            <option value="pastoral-info-general">Pastoral — Info General</option>
+            <option value="pastoral-galeria">Pastoral — Galería</option>
+            <option value="nivel-inicial">Nivel Inicial</option>
+            <option value="nivel-primario">Nivel Primario</option>
+            <option value="nivel-secundario">Nivel Secundario</option>
+            <option value="pasantias-lugares">Pasantías — Lugares</option>
+          </select>
           <input
             className="border rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-school-blue"
             value={editCaption}

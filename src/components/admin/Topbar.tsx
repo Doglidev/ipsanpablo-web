@@ -12,7 +12,11 @@ const Topbar = () => {
         <span className="text-sm text-gray-600">
           {session?.user?.name}
           <span className="ml-2 text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
-            {(session?.user as { role?: string })?.role === 'ADMIN' ? 'Admin' : 'Editor'}
+            {(session?.user as { role?: string })?.role === 'ADMIN'
+            ? 'Admin'
+            : (session?.user as { role?: string })?.role === 'VIEWER'
+            ? 'Visor'
+            : 'Editor'}
           </span>
         </span>
         <button

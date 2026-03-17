@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
+import HomeContactForm from '@/components/public/HomeContactForm'
 
 export const revalidate = 60
 
@@ -136,66 +137,166 @@ const HomePage = async () => {
         </div>
       </section>
 
-      {/* ── ÚLTIMAS NOTICIAS ── */}
-      {latestNews.length > 0 && (
-        <section className="py-20 bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-end justify-between mb-12">
-              <div>
-                <h2 className="text-3xl font-bold text-school-blue mb-2">Últimas Noticias</h2>
-                <p className="text-gray-500">Novedades del colegio</p>
+      {/* ── SECCIÓN 3 COLUMNAS ── */}
+      <section className="py-16 bg-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+
+            {/* ── COL IZQUIERDA: Últimas noticias ── */}
+            <div className="bg-school-blue rounded-2xl overflow-hidden flex flex-col">
+              {/* Header */}
+              <div className="px-6 pt-6 pb-4 border-b border-white/10">
+                <div className="flex items-center gap-2 text-white">
+                  <svg className="w-5 h-5 text-school-gold flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                      d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  <h2 className="text-white font-bold text-lg">Últimas noticias!</h2>
+                </div>
               </div>
-              <Link href="/noticias" className="text-school-blue text-sm font-medium hover:text-school-gold">
-                Ver todas →
-              </Link>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {latestNews.map((article) => (
+
+              {/* News cards */}
+              <div className="flex-1 px-5 py-4 space-y-3 overflow-hidden">
+                {latestNews.length === 0 ? (
+                  <p className="text-white/50 text-sm py-8 text-center">No hay noticias publicadas aún.</p>
+                ) : (
+                  latestNews.map((article) => (
+                    <Link
+                      key={article.id}
+                      href={`/noticias/${article.slug}`}
+                      className="group flex gap-3 bg-white/10 hover:bg-white/20 rounded-xl p-3 transition-colors"
+                    >
+                      {/* Thumbnail */}
+                      <div className="relative w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-white/5">
+                        {article.coverImage ? (
+                          <Image
+                            src={article.coverImage}
+                            alt={article.title}
+                            fill
+                            className="object-cover"
+                            sizes="64px"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <svg className="w-6 h-6 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                                d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+                            </svg>
+                          </div>
+                        )}
+                      </div>
+                      {/* Text */}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-white text-sm font-semibold line-clamp-2 group-hover:text-school-gold transition-colors leading-snug">
+                          {article.title}
+                        </h3>
+                        <p className="text-white/60 text-xs mt-1 line-clamp-2 leading-snug">
+                          {article.excerpt}
+                        </p>
+                      </div>
+                    </Link>
+                  ))
+                )}
+              </div>
+
+              {/* Footer link */}
+              <div className="px-6 py-4 border-t border-white/10">
                 <Link
-                  key={article.id}
-                  href={`/noticias/${article.slug}`}
-                  className="group flex flex-col rounded-2xl border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow"
+                  href="/noticias"
+                  className="text-school-gold hover:text-amber-400 text-sm font-medium transition-colors"
                 >
-                  {article.coverImage ? (
-                    <div className="relative h-48 bg-gray-100">
-                      <Image
-                        src={article.coverImage}
-                        alt={article.title}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 768px) 100vw, 33vw"
-                      />
-                    </div>
-                  ) : (
-                    <div className="h-48 bg-gradient-to-br from-school-blue to-blue-800 flex items-center justify-center">
-                      <svg className="w-12 h-12 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-                          d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
-                      </svg>
-                    </div>
-                  )}
-                  <div className="flex flex-col flex-1 p-5">
-                    {article.publishedAt && (
-                      <time className="text-xs text-gray-400 mb-2">
-                        {new Date(article.publishedAt).toLocaleDateString('es-AR', {
-                          day: 'numeric', month: 'long', year: 'numeric',
-                        })}
-                      </time>
-                    )}
-                    <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-school-blue transition-colors line-clamp-2">
-                      {article.title}
-                    </h3>
-                    <p className="text-sm text-gray-500 line-clamp-3 flex-1">{article.excerpt}</p>
-                    <span className="mt-4 text-school-blue text-sm font-medium group-hover:text-school-gold transition-colors">
-                      Leer más →
-                    </span>
-                  </div>
+                  Ver todas las noticias →
                 </Link>
-              ))}
+              </div>
             </div>
+
+            {/* ── COL CENTRAL: Áulica + Formularios ── */}
+            <div className="flex flex-col gap-4">
+              {/* Banner Áulica */}
+              <a
+                href="https://app.aulica.com.ar/login.html?idCompany=215"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group relative rounded-2xl overflow-hidden bg-emerald-700 hover:bg-emerald-600 transition-colors flex items-center justify-center py-10 px-6 text-center shadow-md"
+              >
+                <div className="relative z-10">
+                  <p className="text-white text-3xl font-black tracking-wide leading-none">
+                    INGRESO A
+                  </p>
+                  <p className="text-white text-4xl font-black tracking-wide leading-none mt-1">
+                    ÁULICA
+                  </p>
+                  <p className="text-emerald-200 text-sm font-bold mt-3 group-hover:text-white transition-colors">
+                    CLICK AQUÍ !!
+                  </p>
+                </div>
+                {/* Decorative */}
+                <div className="absolute inset-0 opacity-10">
+                  <div className="absolute -right-8 -top-8 w-32 h-32 rounded-full bg-white" />
+                  <div className="absolute -left-4 -bottom-4 w-20 h-20 rounded-full bg-white" />
+                </div>
+              </a>
+
+              {/* Botones descarga */}
+              <a
+                href="/formulario-inicial-2026.pdf"
+                download="Formulario-Aspirantes-Inicial-2026.pdf"
+                className="group flex items-center gap-3 bg-sky-500 hover:bg-sky-600 text-white rounded-xl px-5 py-4 font-semibold text-sm transition-colors shadow-sm"
+              >
+                <svg className="w-5 h-5 flex-shrink-0 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                <span className="flex-1 leading-snug">Aspirantes Nivel Inicial 2026 – Salas 3, 4 y 5</span>
+              </a>
+
+              <a
+                href="/formulario-primario-2026.pdf"
+                download="Formulario-Aspirantes-Primario-2026.pdf"
+                className="group flex items-center gap-3 bg-teal-500 hover:bg-teal-600 text-white rounded-xl px-5 py-4 font-semibold text-sm transition-colors shadow-sm"
+              >
+                <svg className="w-5 h-5 flex-shrink-0 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                <span className="flex-1 leading-snug">Aspirantes Nivel Primario 2026</span>
+              </a>
+
+              <a
+                href="/formulario-cus.pdf"
+                download="Formulario-CUS.pdf"
+                className="group flex items-center gap-3 bg-rose-500 hover:bg-rose-600 text-white rounded-xl px-5 py-4 font-semibold text-sm transition-colors shadow-sm"
+              >
+                <svg className="w-5 h-5 flex-shrink-0 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                <span className="flex-1 leading-snug">Formulario C.U.S.</span>
+              </a>
+            </div>
+
+            {/* ── COL DERECHA: Formulario de contacto ── */}
+            <div className="bg-school-blue rounded-2xl overflow-hidden flex flex-col">
+              {/* Header */}
+              <div className="px-6 pt-6 pb-4 border-b border-white/10">
+                <div className="flex items-center gap-2 text-white">
+                  <svg className="w-5 h-5 text-school-gold flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <h2 className="text-white font-bold text-lg">Contáctanos!</h2>
+                </div>
+              </div>
+
+              <div className="flex-1 px-6 py-5">
+                <HomeContactForm />
+              </div>
+            </div>
+
           </div>
-        </section>
-      )}
+        </div>
+      </section>
 
       {/* ── CONTACTO RÁPIDO ── */}
       <section className="py-20 bg-school-blue text-white">

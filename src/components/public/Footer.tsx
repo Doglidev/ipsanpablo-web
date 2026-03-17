@@ -51,8 +51,18 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="mt-10 pt-6 border-t border-blue-700 text-center text-xs text-blue-300">
-          © {new Date().getFullYear()} Instituto Parroquial San Pablo Apóstol. Todos los derechos reservados.
+        <div className="mt-10 pt-6 border-t border-blue-700 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-blue-300">
+          <span>© {new Date().getFullYear()} Instituto Parroquial San Pablo Apóstol. Todos los derechos reservados.</span>
+          <Link
+            href="/admin"
+            className="flex items-center gap-1 text-blue-700 hover:text-blue-500 transition-colors"
+          >
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+            Acceso administrativo
+          </Link>
         </div>
       </div>
     </footer>

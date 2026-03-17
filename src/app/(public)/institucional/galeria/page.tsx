@@ -12,6 +12,7 @@ export const metadata: Metadata = {
 
 const GaleriaPublicaPage = async () => {
   const images = await prisma.galleryImage.findMany({
+    where: { category: 'institucional' },
     orderBy: [{ album: 'asc' }, { sortOrder: 'asc' }, { uploadedAt: 'desc' }],
     select: { id: true, url: true, caption: true, album: true },
   })

@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useState } from 'react'
 
 const NAV_LINKS = [
@@ -41,6 +42,7 @@ const NAV_LINKS = [
       { label: 'Secundario', href: '/secretarias/secundario' },
     ],
   },
+  { label: 'Administración', href: '/administracion' },
   {
     label: 'Pastoral',
     href: '/pastoral/info',
@@ -53,7 +55,12 @@ const NAV_LINKS = [
   { label: 'Contacto', href: '/contacto' },
 ]
 
-const Navbar = () => {
+interface NavbarProps {
+  logoUrl: string | null
+  schoolName: string
+}
+
+const Navbar = ({ logoUrl, schoolName }: NavbarProps) => {
   const [menuOpen, setMenuOpen] = useState(false)
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
 
@@ -63,9 +70,20 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <span className="text-school-blue font-bold text-lg leading-tight">
-              Instituto San Pablo
-            </span>
+            {logoUrl ? (
+              <Image
+                src={logoUrl}
+                alt={schoolName}
+                width={280}
+                height={80}
+                className="h-14 w-auto max-w-[240px] object-contain"
+                priority
+              />
+            ) : (
+              <span className="text-school-blue font-bold text-lg leading-tight">
+                {schoolName}
+              </span>
+            )}
           </Link>
 
           {/* Desktop nav */}

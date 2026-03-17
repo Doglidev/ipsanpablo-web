@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import BlockRenderer from '@/components/public/BlockRenderer'
 import SectionHero from '@/components/public/SectionHero'
 import NivelesNav from '@/components/public/NivelesNav'
+import NivelesCarousel from '@/components/public/NivelesCarousel'
 
 export const revalidate = 60
 
@@ -13,9 +14,14 @@ export const metadata: Metadata = {
 }
 
 const NivelInicialPage = async () => {
-  const section = await prisma.section.findUnique({
-    where: { slug: 'nivel-inicial' },
-  })
+  const [section, images] = await Promise.all([
+    prisma.section.findUnique({ where: { slug: 'nivel-inicial' } }),
+    prisma.galleryImage.findMany({
+      where: { category: 'nivel-inicial' },
+      orderBy: [{ sortOrder: 'asc' }, { uploadedAt: 'desc' }],
+      select: { id: true, url: true, caption: true },
+    }),
+  ])
 
   if (!section || !section.isVisible) notFound()
 
@@ -33,6 +39,7 @@ const NivelInicialPage = async () => {
         <NivelesNav active="inicial" />
         <div className="max-w-4xl mt-8">
           <BlockRenderer content={section.content} />
+          <NivelesCarousel images={images} title="Galería" />
         </div>
       </div>
     </div>

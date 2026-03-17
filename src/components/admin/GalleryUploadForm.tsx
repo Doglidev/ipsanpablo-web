@@ -81,6 +81,24 @@ const GalleryUploadForm = ({ albums }: GalleryUploadFormProps) => {
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">
+                Categoría <span className="text-red-500">*</span>
+              </label>
+              <select
+                name="category"
+                required
+                className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-school-blue"
+              >
+                <option value="institucional">Institucional</option>
+                <option value="pastoral-info-general">Pastoral — Info General</option>
+                <option value="pastoral-galeria">Pastoral — Galería</option>
+                <option value="nivel-inicial">Nivel Inicial</option>
+                <option value="nivel-primario">Nivel Primario</option>
+                <option value="nivel-secundario">Nivel Secundario</option>
+                <option value="pasantias-lugares">Pasantías — Lugares</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-1">
                 Descripción (opcional)
               </label>
               <input
