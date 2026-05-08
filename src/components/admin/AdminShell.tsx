@@ -31,7 +31,7 @@ const AdminShell = ({ children }: { children: React.ReactNode }) => {
 
       {/* Main */}
       <div className="flex-1 flex flex-col min-w-0">
-        <Topbar onMenuClick={() => setSidebarOpen((v) => !v)} />
+        <Topbar />
         <main className="flex-1 p-4 md:p-6">{children}</main>
       </div>
     </div>
