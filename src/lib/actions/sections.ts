@@ -60,6 +60,8 @@ export async function createSection(_prevState: ActionResult | null, formData: F
     })
 
     revalidatePath('/admin/secciones')
+    revalidatePath(`/seccion/${parsed.data.slug}`)
+    revalidatePath('/', 'layout')
   } catch (e) {
     if (e instanceof Error && e.message === 'No autorizado') {
       return { success: false, error: 'No autorizado' }
@@ -96,8 +98,8 @@ export async function updateSection(
 
     revalidatePath('/admin/secciones')
     revalidatePath(`/admin/secciones/${slug}`)
-    revalidatePath(`/institucional/${slug}`)
-    revalidatePath(`/niveles/${slug.replace('nivel-', '')}`)
+    revalidatePath(`/seccion/${slug}`)
+    revalidatePath('/', 'layout')
 
     return { success: true }
   } catch (e) {
@@ -113,6 +115,8 @@ export async function deleteSection(slug: string): Promise<ActionResult> {
     await requireSession()
     await prisma.section.delete({ where: { slug } })
     revalidatePath('/admin/secciones')
+    revalidatePath(`/seccion/${slug}`)
+    revalidatePath('/', 'layout')
     return { success: true }
   } catch (e) {
     if (e instanceof Error && e.message === 'No autorizado') {
@@ -127,6 +131,8 @@ export async function toggleSectionVisibility(slug: string, isVisible: boolean):
     await requireSession()
     await prisma.section.update({ where: { slug }, data: { isVisible } })
     revalidatePath('/admin/secciones')
+    revalidatePath(`/seccion/${slug}`)
+    revalidatePath('/', 'layout')
     return { success: true }
   } catch {
     return { success: false, error: 'Error al actualizar la visibilidad' }

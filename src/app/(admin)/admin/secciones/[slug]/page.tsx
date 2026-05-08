@@ -24,7 +24,7 @@ const SectionEditorPage = async ({ params }: SectionEditorPageProps) => {
           <p className="text-xs text-gray-400 font-mono mt-0.5">slug: {section.slug}</p>
         </div>
         <a
-          href={`/${section.pageGroup}/${section.slug}`}
+          href={`/seccion/${section.slug}`}
           target="_blank"
           rel="noopener noreferrer"
           className="text-sm text-gray-500 hover:text-school-blue flex items-center gap-1"

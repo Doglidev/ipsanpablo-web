@@ -1,7 +1,10 @@
 'use server'
 
 import { z } from 'zod'
+import { Resend } from 'resend'
 import type { ActionResult } from '@/types'
+
+const resend = new Resend(process.env.RESEND_API_KEY)
 
 const contactSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
@@ -22,7 +25,30 @@ export async function sendContactForm(formData: FormData): Promise<ActionResult>
   if (!parsed.success) {
     return { success: false, error: parsed.error.issues[0].message }
   }
-  // Log for now — replace with email service later
-  console.log('[Contacto]', parsed.data)
+
+  const { name, email, phone, subject, message } = parsed.data
+  const destinatario = process.env.CONTACT_EMAIL ?? 'secretaria@ipsanpablo.com'
+
+  const { error } = await resend.emails.send({
+    from: 'Instituto San Pablo <onboarding@resend.dev>',
+    to: destinatario,
+    replyTo: email,
+    subject: subject ? `Contacto: ${subject}` : `Nuevo mensaje de contacto de ${name}`,
+    html: `
+      <h2>Nuevo mensaje de contacto</h2>
+      <p><strong>Nombre:</strong> ${name}</p>
+      <p><strong>Email:</strong> ${email}</p>
+      ${phone ? `<p><strong>Teléfono:</strong> ${phone}</p>` : ''}
+      ${subject ? `<p><strong>Asunto:</strong> ${subject}</p>` : ''}
+      <p><strong>Mensaje:</strong></p>
+      <p style="white-space: pre-wrap;">${message}</p>
+    `,
+  })
+
+  if (error) {
+    console.error('[Contacto] Error al enviar email:', error)
+    return { success: false, error: 'No se pudo enviar el mensaje. Intentá de nuevo más tarde.' }
+  }
+
   return { success: true }
 }

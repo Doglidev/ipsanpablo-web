@@ -1,7 +1,9 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useRef } from 'react'
+import Image from 'next/image'
 import { updateConfig } from '@/lib/actions/config'
+import { uploadBlockImage } from '@/lib/actions/upload-block-image'
 
 interface SiteConfig {
   schoolName: string
@@ -30,6 +32,30 @@ const ConfigForm = ({ config }: ConfigFormProps) => {
   const [isPending, startTransition] = useTransition()
   const [result, setResult] = useState<{ success: boolean; error?: string } | null>(null)
   const [inscripcionOpen, setInscripcionOpen] = useState(config.inscripcionOpen)
+
+  // Hero image drop
+  const [heroImageUrl, setHeroImageUrl] = useState(config.heroImageUrl ?? '')
+  const [heroPreview, setHeroPreview] = useState(config.heroImageUrl ?? '')
+  const [heroDragging, setHeroDragging] = useState(false)
+  const [heroUploading, setHeroUploading] = useState(false)
+  const heroInputRef = useRef<HTMLInputElement>(null)
+
+  const uploadHeroImage = async (file: File) => {
+    setHeroUploading(true)
+    const fd = new FormData()
+    fd.append('file', file)
+    const res = await uploadBlockImage(fd)
+    setHeroUploading(false)
+    if (res.success) {
+      setHeroImageUrl(res.url)
+      setHeroPreview(res.url)
+    }
+  }
+
+  const handleHeroFile = (file: File) => {
+    setHeroPreview(URL.createObjectURL(file))
+    uploadHeroImage(file)
+  }
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -71,8 +97,40 @@ const ConfigForm = ({ config }: ConfigFormProps) => {
           <input name="heroSubtitle" className={inputClass} defaultValue={config.heroSubtitle} placeholder="Educación con valores desde 1959" />
         </div>
         <div>
-          <label className={labelClass}>Imagen de fondo (URL)</label>
-          <input name="heroImageUrl" className={inputClass} defaultValue={config.heroImageUrl ?? ''} placeholder="https://res.cloudinary.com/..." />
+          <label className={labelClass}>Imagen de fondo</label>
+          <input type="hidden" name="heroImageUrl" value={heroImageUrl} />
+          <label
+            className={`relative flex w-full h-36 rounded-xl border-2 border-dashed cursor-pointer overflow-hidden transition-colors ${
+              heroDragging ? 'border-school-blue bg-blue-50' : 'border-gray-300 hover:border-school-blue'
+            }`}
+            onDragOver={(e) => { e.preventDefault(); setHeroDragging(true) }}
+            onDragLeave={() => setHeroDragging(false)}
+            onDrop={(e) => { e.preventDefault(); setHeroDragging(false); const f = e.dataTransfer.files?.[0]; if (f) handleHeroFile(f) }}
+          >
+            {heroPreview ? (
+              <Image src={heroPreview} alt="Hero preview" fill className="object-cover" unoptimized={heroPreview.startsWith('blob:')} />
+            ) : (
+              <div className="flex flex-col items-center justify-center w-full h-full text-gray-400 gap-1 pointer-events-none">
+                <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span className="text-xs">Arrastrá o hacé click para seleccionar</span>
+              </div>
+            )}
+            {heroUploading && (
+              <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
+                <span className="text-xs text-school-blue font-medium">Subiendo...</span>
+              </div>
+            )}
+            <input
+              ref={heroInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="absolute inset-0 opacity-0 cursor-pointer"
+              onChange={(e) => { const f = e.target.files?.[0]; if (f) handleHeroFile(f) }}
+            />
+          </label>
+          <p className="text-xs text-gray-400 mt-1">JPG, PNG, WEBP · Máx. 5 MB</p>
         </div>
       </div>
 

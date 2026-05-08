@@ -8,6 +8,7 @@ const NAV_LINKS = [
   {
     label: 'Institucional',
     href: '/institucional/nuestra-escuela',
+    pageGroup: 'institucional',
     children: [
       { label: 'Nuestra Escuela', href: '/institucional/nuestra-escuela' },
       { label: 'Autoridades', href: '/institucional/autoridades' },
@@ -17,6 +18,7 @@ const NAV_LINKS = [
   {
     label: 'Niveles',
     href: '/niveles/inicial',
+    pageGroup: 'niveles',
     children: [
       { label: 'Inicial', href: '/niveles/inicial' },
       { label: 'Primario', href: '/niveles/primario' },
@@ -27,6 +29,7 @@ const NAV_LINKS = [
   {
     label: 'Pasantías',
     href: '/pasantias/objetivo',
+    pageGroup: 'pasantias',
     children: [
       { label: 'Objetivo', href: '/pasantias/objetivo' },
       { label: 'Espacios Curriculares', href: '/pasantias/espacios-curriculares' },
@@ -37,6 +40,7 @@ const NAV_LINKS = [
   {
     label: 'Secretarías',
     href: '/secretarias/inicial-primario',
+    pageGroup: 'secretarias',
     children: [
       { label: 'Inicial y Primario', href: '/secretarias/inicial-primario' },
       { label: 'Secundario', href: '/secretarias/secundario' },
@@ -46,6 +50,7 @@ const NAV_LINKS = [
   {
     label: 'Pastoral',
     href: '/pastoral/info',
+    pageGroup: 'pastoral',
     children: [
       { label: 'Información', href: '/pastoral/info' },
       { label: 'Galería', href: '/pastoral/galeria' },
@@ -55,14 +60,41 @@ const NAV_LINKS = [
   { label: 'Contacto', href: '/contacto' },
 ]
 
+// Slugs de secciones existentes que ya están representadas en el navbar hardcodeado.
+// Solo las secciones cuyo slug NO esté aquí se agregan dinámicamente.
+const EXISTING_SLUGS = new Set([
+  'nuestra-escuela', 'autoridades', 'galeria-institucional',
+  'nivel-inicial', 'nivel-primario', 'nivel-secundario',
+  'becas',
+  'pasantias-objetivo', 'pasantias-espacios-curriculares', 'pasantias-lugares', 'pasantias-monitoreo',
+  'secretaria-inicial-primario', 'secretaria-secundario',
+  'administracion',
+  'pastoral-info', 'pastoral-galeria',
+])
+
+interface NavSection {
+  slug: string
+  title: string
+  pageGroup: string
+}
+
 interface NavbarProps {
   logoUrl: string | null
   schoolName: string
+  sections?: NavSection[]
 }
 
-const Navbar = ({ logoUrl, schoolName }: NavbarProps) => {
+const Navbar = ({ logoUrl, schoolName, sections = [] }: NavbarProps) => {
   const [menuOpen, setMenuOpen] = useState(false)
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
+
+  const getChildren = (link: typeof NAV_LINKS[number]) => {
+    if (!('children' in link) || !('pageGroup' in link)) return []
+    const extras = sections
+      .filter((s) => s.pageGroup === link.pageGroup && !EXISTING_SLUGS.has(s.slug))
+      .map((s) => ({ label: s.title, href: `/seccion/${s.slug}` }))
+    return [...(link.children ?? []), ...extras]
+  }
 
   return (
     <nav className="bg-white shadow-md sticky top-0 z-50">
@@ -107,7 +139,7 @@ const Navbar = ({ logoUrl, schoolName }: NavbarProps) => {
                       onMouseEnter={() => setOpenDropdown(link.label)}
                       onMouseLeave={() => setOpenDropdown(null)}
                     >
-                      {link.children.map((child) => (
+                      {getChildren(link).map((child) => (
                         <Link
                           key={child.href}
                           href={child.href}
@@ -165,7 +197,7 @@ const Navbar = ({ logoUrl, schoolName }: NavbarProps) => {
                 </button>
                 {openDropdown === link.label && (
                   <div className="pl-4 bg-gray-50">
-                    {link.children.map((child) => (
+                    {getChildren(link).map((child) => (
                       <Link
                         key={child.href}
                         href={child.href}

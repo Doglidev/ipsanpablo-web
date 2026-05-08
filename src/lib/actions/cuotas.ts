@@ -1,12 +1,10 @@
 'use server'
 
 import { z } from 'zod'
+import { Resend } from 'resend'
 import type { ActionResult } from '@/types'
 
-const MESES = [
-  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
-]
+const resend = new Resend(process.env.RESEND_API_KEY)
 
 const cuotasSchema = z.object({
   alumnoNombre: z.string().min(2, 'El nombre y apellido es requerido'),
@@ -31,16 +29,28 @@ export async function submitActualizacionCuotas(formData: FormData): Promise<Act
     return { success: false, error: parsed.error.issues[0].message }
   }
 
-  // Log — reemplazar por envío de email cuando esté disponible
-  console.log('[Actualización de Cuotas]', {
-    alumno: parsed.data.alumnoNombre,
-    email: parsed.data.email,
-    cuotas: parsed.data.cuotas.join(', '),
-    fechaPago: parsed.data.fechaPago,
-    comentarios: parsed.data.comentarios ?? '—',
+  const { alumnoNombre, email, fechaPago, comentarios } = parsed.data
+  const destinatario = process.env.CONTACT_EMAIL ?? 'secretaria@ipsanpablo.com'
+
+  const { error } = await resend.emails.send({
+    from: 'Instituto San Pablo <onboarding@resend.dev>',
+    to: destinatario,
+    replyTo: email,
+    subject: `Actualización de cuotas - ${alumnoNombre}`,
+    html: `
+      <h2>Solicitud de actualización de cuotas</h2>
+      <p><strong>Alumno:</strong> ${alumnoNombre}</p>
+      <p><strong>Email de contacto:</strong> ${email}</p>
+      <p><strong>Cuota/s a actualizar:</strong> ${cuotas.join(', ')}</p>
+      <p><strong>Fecha de pago:</strong> ${fechaPago}</p>
+      ${comentarios ? `<p><strong>Comentarios:</strong></p><p style="white-space: pre-wrap;">${comentarios}</p>` : ''}
+    `,
   })
+
+  if (error) {
+    console.error('[Cuotas] Error al enviar email:', error)
+    return { success: false, error: 'No se pudo enviar la solicitud. Intentá de nuevo más tarde.' }
+  }
 
   return { success: true }
 }
-
-export { MESES }
