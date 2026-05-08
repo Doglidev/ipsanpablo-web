@@ -25,7 +25,7 @@ const AdminShell = ({ children }: { children: React.ReactNode }) => {
         }`}
       >
         <Suspense fallback={<div className="w-64 bg-gray-900 min-h-screen" />}>
-          <Sidebar onClose={close} />
+          <Sidebar />
         </Suspense>
       </div>
 
