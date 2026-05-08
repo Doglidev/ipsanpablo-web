@@ -27,15 +27,17 @@ const updateSectionSchema = z.object({
   heroImage: z.string().url().optional().nullable(),
 })
 
-async function requireSession() {
+async function requireEditor() {
   const session = await getServerSession(authOptions)
   if (!session) throw new Error('No autorizado')
+  const role = (session.user as { role?: string })?.role
+  if (role === 'VIEWER') throw new Error('No autorizado')
   return session
 }
 
 export async function createSection(_prevState: ActionResult | null, formData: FormData): Promise<ActionResult> {
   try {
-    await requireSession()
+    await requireEditor()
 
     const raw = {
       slug: formData.get('slug'),
@@ -84,7 +86,7 @@ export async function updateSection(
   }
 ): Promise<ActionResult> {
   try {
-    await requireSession()
+    await requireEditor()
 
     const parsed = updateSectionSchema.safeParse(data)
     if (!parsed.success) {
@@ -112,7 +114,7 @@ export async function updateSection(
 
 export async function deleteSection(slug: string): Promise<ActionResult> {
   try {
-    await requireSession()
+    await requireEditor()
     await prisma.section.delete({ where: { slug } })
     revalidatePath('/admin/secciones')
     revalidatePath(`/seccion/${slug}`)
@@ -128,7 +130,7 @@ export async function deleteSection(slug: string): Promise<ActionResult> {
 
 export async function toggleSectionVisibility(slug: string, isVisible: boolean): Promise<ActionResult> {
   try {
-    await requireSession()
+    await requireEditor()
     await prisma.section.update({ where: { slug }, data: { isVisible } })
     revalidatePath('/admin/secciones')
     revalidatePath(`/seccion/${slug}`)
