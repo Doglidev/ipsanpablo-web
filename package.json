@@ -2,13 +2,13 @@
   "name": "ipsanpablo-web",
   "version": "0.1.0",
   "private": true,
-"scripts": {
-  "dev": "next dev",
-  "build": "prisma generate && prisma migrate deploy && next build",
-  "start": "next start",
-  "lint": "eslint",
-  "seed": "ts-node prisma/seed.ts"
-},
+  "scripts": {
+    "dev": "next dev",
+    "build": "prisma generate && prisma migrate deploy && next build",
+    "start": "next start",
+    "lint": "eslint",
+    "seed": "ts-node prisma/seed.ts"
+  },
   "prisma": {
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
   },
@@ -16,7 +16,7 @@
     "@prisma/client": "^5.22.0",
     "bcryptjs": "^3.0.3",
     "cloudinary": "^2.9.0",
-    "next": "16.1.6",
+    "next": "^16.2.6",
     "next-auth": "^4.24.13",
     "react": "19.2.3",
     "react-dom": "19.2.3",
