@@ -4,13 +4,29 @@ import bcrypt from 'bcryptjs'
 const prisma = new PrismaClient()
 
 async function main() {
-  // Admin user
-  const hashedPassword = await bcrypt.hash('admin123', 12)
+  // Admin user - credentials from environment variables
+  const adminEmail = process.env.ADMIN_EMAIL
+  const adminPassword = process.env.ADMIN_PASSWORD
+
+  if (!adminEmail || !adminPassword) {
+    throw new Error(
+      'ERROR: ADMIN_EMAIL and ADMIN_PASSWORD environment variables are required to run the seed. ' +
+      'Please set them in your .env file before running.'
+    )
+  }
+
+  if (adminPassword.length < 12) {
+    throw new Error(
+      'ERROR: ADMIN_PASSWORD must be at least 12 characters long for security reasons.'
+    )
+  }
+
+  const hashedPassword = await bcrypt.hash(adminPassword, 12)
   const admin = await prisma.user.upsert({
-    where: { email: 'admin@ipsanpablo.com' },
+    where: { email: adminEmail },
     update: {},
     create: {
-      email: 'admin@ipsanpablo.com',
+      email: adminEmail,
       password: hashedPassword,
       name: 'Administrador',
       role: 'ADMIN',
