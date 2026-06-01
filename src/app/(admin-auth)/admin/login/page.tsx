@@ -27,7 +27,6 @@ const LoginPage = () => {
     } else {
       setLoading(false)
       router.push('/admin')
-      router.refresh()
     }
   }
 
