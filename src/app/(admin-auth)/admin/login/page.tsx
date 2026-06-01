@@ -1,11 +1,9 @@
 'use client'
 
-import { signIn } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { signIn, getSession } from 'next-auth/react'
 import { useState } from 'react'
 
 const LoginPage = () => {
-  const router = useRouter()
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
@@ -21,12 +19,13 @@ const LoginPage = () => {
       redirect: false,
     })
 
-    if (result?.error) {
+    if (!result?.ok || result?.error) {
       setError('Email o contraseña incorrectos.')
       setLoading(false)
     } else {
+      await getSession()
       setLoading(false)
-      router.push('/admin')
+      window.location.href = '/admin'
     }
   }
 
