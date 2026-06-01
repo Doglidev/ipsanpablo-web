@@ -25,7 +25,9 @@ const LoginPage = () => {
       setError('Email o contraseña incorrectos.')
       setLoading(false)
     } else {
+      setLoading(false)
       router.push('/admin')
+      router.refresh()
     }
   }
 

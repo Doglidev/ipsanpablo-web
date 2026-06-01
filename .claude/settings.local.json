@@ -11,7 +11,11 @@
       "Bash(npx ts-node:*)",
       "Bash(cd:*)",
       "Bash(find:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(git checkout:*)",
+      "Bash(rm:*)",
+      "Bash(grep:*)",
+      "PowerShell($r = Invoke-WebRequest -Uri \"http://localhost:3000\" -TimeoutSec 30 -UseBasicParsing 2>&1; Write-Host \"Status: $\\($r.StatusCode\\)\"; Write-Host \\($r.Content | Select-Object -First 500\\))"
     ]
   }
 }
