@@ -239,27 +239,27 @@ const HomePage = async () => {
 
               {/* Botones descarga */}
               <a
-                href="/formulario-inicial-2026.pdf"
-                download="Formulario-Aspirantes-Inicial-2026.pdf"
+                href="/formulario-inicial-2027.pdf"
+                download="Formulario-Aspirantes-Inicial-2027.pdf"
                 className="group flex items-center gap-3 bg-sky-500 hover:bg-sky-600 text-white rounded-xl px-5 py-4 font-semibold text-sm transition-colors shadow-sm"
               >
                 <svg className="w-5 h-5 flex-shrink-0 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                     d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                 </svg>
-                <span className="flex-1 leading-snug">Aspirantes Nivel Inicial 2026 – Salas 3, 4 y 5</span>
+                <span className="flex-1 leading-snug">Aspirantes Nivel Inicial 2027 – Salas 3, 4 y 5</span>
               </a>
 
               <a
-                href="/formulario-primario-2026.pdf"
-                download="Formulario-Aspirantes-Primario-2026.pdf"
+                href="/formulario-primario-2027.pdf"
+                download="Formulario-Aspirantes-Primario-2027.pdf"
                 className="group flex items-center gap-3 bg-teal-500 hover:bg-teal-600 text-white rounded-xl px-5 py-4 font-semibold text-sm transition-colors shadow-sm"
               >
                 <svg className="w-5 h-5 flex-shrink-0 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                     d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                 </svg>
-                <span className="flex-1 leading-snug">Aspirantes Nivel Primario 2026</span>
+                <span className="flex-1 leading-snug">Aspirantes Nivel Primario 2027</span>
               </a>
 
               <a
@@ -272,6 +272,18 @@ const HomePage = async () => {
                     d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                 </svg>
                 <span className="flex-1 leading-snug">Formulario C.U.S.</span>
+              </a>
+
+              <a
+                href="/Informe de Salud Anual - ISA-DDJJ.pdf"
+                download="Informe de Salud Anual - ISA-DDJJ.pdf"
+                className="group flex items-center gap-3 bg-teal-500 hover:bg-teal-600 text-white rounded-xl px-5 py-4 font-semibold text-sm transition-colors shadow-sm"
+              >
+                <svg className="w-5 h-5 flex-shrink-0 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                <span className="flex-1 leading-snug">Informe de Salud Anual</span>
               </a>
             </div>
 
