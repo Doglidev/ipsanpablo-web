@@ -81,3 +81,20 @@ model SiteConfig {
   inscripcionOpen Boolean @default(false)
   inscripcionText String  @default("")
 }
+
+model HomeButton {
+  id           String  @id @default(cuid())
+  label        String
+  fileUrl      String  @default("")
+  downloadName String  @default("")
+  color        String  @default("sky")
+  sortOrder    Int     @default(0)
+  isVisible    Boolean @default(true)
+}
+
+model StoredPdf {
+  id        String   @id @default(cuid())
+  fileName  String
+  data      Bytes
+  createdAt DateTime @default(now())
+}

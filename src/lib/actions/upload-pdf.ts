@@ -1,0 +1,28 @@
+'use server'
+
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
+
+export async function uploadPdf(
+  formData: FormData
+): Promise<{ success: true; url: string } | { success: false; error: string }> {
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session) return { success: false, error: 'No autorizado' }
+
+    const file = formData.get('file') as File | null
+    if (!file || file.size === 0) return { success: false, error: 'No se seleccionó ningún archivo' }
+    if (file.type !== 'application/pdf') return { success: false, error: 'El archivo debe ser un PDF' }
+    if (file.size > 10 * 1024 * 1024) return { success: false, error: 'El PDF no puede superar los 10 MB' }
+
+    const bytes = await file.arrayBuffer()
+    const stored = await prisma.storedPdf.create({
+      data: { fileName: file.name, data: Buffer.from(bytes) },
+    })
+
+    return { success: true, url: `/api/pdf/${stored.id}` }
+  } catch {
+    return { success: false, error: 'Error al guardar el archivo' }
+  }
+}

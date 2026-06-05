@@ -44,8 +44,28 @@ const NIVELES = [
   },
 ]
 
+const BUTTON_COLORS: Record<string, string> = {
+  sky:     'bg-sky-500 hover:bg-sky-600',
+  teal:    'bg-teal-500 hover:bg-teal-600',
+  rose:    'bg-rose-500 hover:bg-rose-600',
+  amber:   'bg-amber-500 hover:bg-amber-600',
+  purple:  'bg-purple-500 hover:bg-purple-600',
+  emerald: 'bg-emerald-600 hover:bg-emerald-700',
+  blue:    'bg-blue-600 hover:bg-blue-700',
+  orange:  'bg-orange-500 hover:bg-orange-600',
+}
+
+type ButtonItem = { label: string; fileUrl: string; downloadName: string; color: string }
+
+const HARDCODED_BUTTONS: ButtonItem[] = [
+  { label: 'Aspirantes Nivel Inicial 2027 – Salas 3, 4 y 5', fileUrl: '/formulario-inicial-2027.pdf',  downloadName: 'Formulario-Aspirantes-Inicial-2027.pdf',  color: 'sky' },
+  { label: 'Aspirantes Nivel Primario 2027',                  fileUrl: '/formulario-primario-2027.pdf', downloadName: 'Formulario-Aspirantes-Primario-2027.pdf', color: 'teal' },
+  { label: 'Formulario C.U.S.',                               fileUrl: '/formulario-cus.pdf',           downloadName: 'Formulario-CUS.pdf',                     color: 'rose' },
+  { label: 'Informe de Salud Anual',                          fileUrl: '/Informe de Salud Anual - ISA-DDJJ.pdf', downloadName: 'Informe de Salud Anual - ISA-DDJJ.pdf', color: 'teal' },
+]
+
 const HomePage = async () => {
-  const [siteConfig, latestNews] = await Promise.all([
+  const [siteConfig, latestNews, dbButtons] = await Promise.all([
     prisma.siteConfig.findUnique({ where: { id: 'main' } }),
     prisma.newsArticle.findMany({
       where: { isPublished: true },
@@ -53,7 +73,10 @@ const HomePage = async () => {
       take: 3,
       select: { id: true, slug: true, title: true, excerpt: true, coverImage: true, publishedAt: true },
     }),
+    prisma.homeButton.findMany({ where: { isVisible: true }, orderBy: { sortOrder: 'asc' } }).catch(() => []),
   ])
+
+  const homeButtons: ButtonItem[] = dbButtons.length > 0 ? dbButtons : HARDCODED_BUTTONS
 
   const heroTitle = siteConfig?.heroTitle || 'Instituto Parroquial San Pablo Apóstol'
   const heroSubtitle = siteConfig?.heroSubtitle || 'Educación con valores desde 1959'
@@ -160,7 +183,7 @@ const HomePage = async () => {
                 {latestNews.length === 0 ? (
                   <p className="text-white/50 text-sm py-8 text-center">No hay noticias publicadas aún.</p>
                 ) : (
-                  latestNews.map((article) => (
+                  latestNews.map((article: (typeof latestNews)[number]) => (
                     <Link
                       key={article.id}
                       href={`/noticias/${article.slug}`}
@@ -238,53 +261,20 @@ const HomePage = async () => {
               </a>
 
               {/* Botones descarga */}
-              <a
-                href="/formulario-inicial-2027.pdf"
-                download="Formulario-Aspirantes-Inicial-2027.pdf"
-                className="group flex items-center gap-3 bg-sky-500 hover:bg-sky-600 text-white rounded-xl px-5 py-4 font-semibold text-sm transition-colors shadow-sm"
-              >
-                <svg className="w-5 h-5 flex-shrink-0 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-                <span className="flex-1 leading-snug">Aspirantes Nivel Inicial 2027 – Salas 3, 4 y 5</span>
-              </a>
-
-              <a
-                href="/formulario-primario-2027.pdf"
-                download="Formulario-Aspirantes-Primario-2027.pdf"
-                className="group flex items-center gap-3 bg-teal-500 hover:bg-teal-600 text-white rounded-xl px-5 py-4 font-semibold text-sm transition-colors shadow-sm"
-              >
-                <svg className="w-5 h-5 flex-shrink-0 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-                <span className="flex-1 leading-snug">Aspirantes Nivel Primario 2027</span>
-              </a>
-
-              <a
-                href="/formulario-cus.pdf"
-                download="Formulario-CUS.pdf"
-                className="group flex items-center gap-3 bg-rose-500 hover:bg-rose-600 text-white rounded-xl px-5 py-4 font-semibold text-sm transition-colors shadow-sm"
-              >
-                <svg className="w-5 h-5 flex-shrink-0 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-                <span className="flex-1 leading-snug">Formulario C.U.S.</span>
-              </a>
-
-              <a
-                href="/Informe de Salud Anual - ISA-DDJJ.pdf"
-                download="Informe de Salud Anual - ISA-DDJJ.pdf"
-                className="group flex items-center gap-3 bg-teal-500 hover:bg-teal-600 text-white rounded-xl px-5 py-4 font-semibold text-sm transition-colors shadow-sm"
-              >
-                <svg className="w-5 h-5 flex-shrink-0 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-                <span className="flex-1 leading-snug">Informe de Salud Anual</span>
-              </a>
+              {homeButtons.map((btn, i) => (
+                <a
+                  key={i}
+                  href={btn.fileUrl}
+                  download={btn.downloadName || btn.label}
+                  className={`group flex items-center gap-3 ${BUTTON_COLORS[btn.color] ?? BUTTON_COLORS.sky} text-white rounded-xl px-5 py-4 font-semibold text-sm transition-colors shadow-sm`}
+                >
+                  <svg className="w-5 h-5 flex-shrink-0 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  <span className="flex-1 leading-snug">{btn.label}</span>
+                </a>
+              ))}
             </div>
 
             {/* ── COL DERECHA: Formulario de contacto ── */}
