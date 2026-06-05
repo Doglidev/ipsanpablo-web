@@ -135,7 +135,6 @@ const BlockItem = ({ block }: { block: ContentBlock }) => {
 
     case 'video': {
       const data = block.data as VideoData
-      // Soporta URLs de YouTube e iframe embeds
       const embedUrl = toEmbedUrl(data.url)
       if (!embedUrl) return null
       return (
@@ -144,8 +143,9 @@ const BlockItem = ({ block }: { block: ContentBlock }) => {
             <iframe
               src={embedUrl}
               title={data.caption ?? 'Video'}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowFullScreen
+              referrerPolicy="no-referrer-when-downgrade"
               className="absolute inset-0 w-full h-full"
             />
           </div>
@@ -211,8 +211,8 @@ const toEmbedUrl = (url: string): string | null => {
   try {
     const u = new URL(url)
     if (u.hostname.includes('youtube.com') || u.hostname.includes('youtu.be')) {
-      const id =
-        u.searchParams.get('v') ?? u.pathname.split('/').pop() ?? ''
+      const id = u.searchParams.get('v') ?? u.pathname.split('/').filter(Boolean).pop() ?? ''
+      if (!id) return null
       return `https://www.youtube.com/embed/${id}`
     }
     return url
