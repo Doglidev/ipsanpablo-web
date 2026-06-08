@@ -5,27 +5,33 @@ import { useState } from 'react'
 const VIDEOS = [
   {
     id: 'intro',
-    title: 'Primeros pasos en el panel',
-    description: 'Recorrido general por el panel de administración.',
-    youtubeId: '',
-  },
-  {
-    id: 'noticias',
-    title: 'Cómo publicar una noticia',
-    description: 'Crear, editar y publicar noticias con el editor de bloques.',
-    youtubeId: '',
+    title: 'Bienvenida al panel',
+    description: 'Cómo acceder al panel y recorrido de bienvenida.',
+    youtubeId: 'numPjnwcd-A',
   },
   {
     id: 'secciones',
     title: 'Cómo editar una sección',
     description: 'Modificar el contenido de las páginas del sitio.',
-    youtubeId: '',
+    youtubeId: 'l7o7uEE1Jh4',
+  },
+  {
+    id: 'noticias',
+    title: 'Cómo publicar una noticia',
+    description: 'Crear, editar y publicar noticias con el editor de bloques.',
+    youtubeId: 'Adj0jb1x3uQ',
   },
   {
     id: 'galeria',
     title: 'Gestión de la galería',
     description: 'Subir, organizar y eliminar imágenes de la galería.',
-    youtubeId: '',
+    youtubeId: '8GPcSEQvJtA',
+  },
+  {
+    id: 'configuracion',
+    title: 'Configuración y usuarios',
+    description: 'Ajustes generales del sitio y gestión de cuentas de usuario.',
+    youtubeId: 'olen03hAaxU',
   },
 ]
 
