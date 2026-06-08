@@ -188,11 +188,12 @@ const VideoCard = ({ title, description, youtubeId }: { title: string; descripti
     <div className="bg-white rounded-xl border overflow-hidden">
       <div className="aspect-video">
         <iframe
-          src={`https://www.youtube.com/embed/${youtubeId}`}
+          src={`https://www.youtube-nocookie.com/embed/${youtubeId}`}
           title={title}
           className="w-full h-full"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowFullScreen
+          referrerPolicy="no-referrer-when-downgrade"
         />
       </div>
       <div className="p-4">
