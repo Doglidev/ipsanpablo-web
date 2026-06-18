@@ -91,7 +91,7 @@ const NoticiasPage = async ({ searchParams }: NoticiasPageProps) => {
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-gray-900 truncate">{article.title}</p>
                   <p className="text-xs text-gray-400 mt-0.5">
-                    {article.author.name} ·{' '}
+                    {article.author?.name ?? 'Sin autor'} ·{' '}
                     {new Date(article.updatedAt).toLocaleDateString('es-AR')}
                   </p>
                 </div>

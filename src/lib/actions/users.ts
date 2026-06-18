@@ -1,24 +1,11 @@
 'use server'
 
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 import bcrypt from 'bcryptjs'
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
+import { requireAdmin } from '@/lib/auth-guards'
 import type { ActionResult } from '@/types'
-
-// ── Helpers ──────────────────────────────────────────────
-
-async function requireAdmin() {
-  const session = await getServerSession(authOptions)
-  const role = (session?.user as { role?: string } | undefined)?.role
-  if (!session || role !== 'ADMIN') {
-    throw new Error('No autorizado')
-  }
-  return session
-}
 
 // ── Schemas ───────────────────────────────────────────────
 
@@ -51,8 +38,7 @@ const updateUserSchema = z.object({
 
 export async function createUser(formData: FormData): Promise<ActionResult> {
   try {
-    const session = await requireAdmin()
-    const currentUserId = (session.user as { id: string }).id
+    await requireAdmin()
 
     const parsed = createUserSchema.safeParse({
       name: formData.get('name'),

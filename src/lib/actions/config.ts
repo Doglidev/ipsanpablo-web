@@ -1,16 +1,14 @@
 'use server'
 
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { siteConfigSchema } from '@/lib/validations'
 import { revalidatePath } from 'next/cache'
+import { requireEditor, authErrorResult } from '@/lib/auth-guards'
 import type { ActionResult } from '@/types'
 
 export async function updateConfig(formData: FormData): Promise<ActionResult> {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session) return { success: false, error: 'No autorizado' }
+    await requireEditor()
 
     const raw = {
       schoolName: formData.get('schoolName') ?? '',
@@ -42,7 +40,7 @@ export async function updateConfig(formData: FormData): Promise<ActionResult> {
     revalidatePath('/')
     revalidatePath('/admin/configuracion')
     return { success: true }
-  } catch {
-    return { success: false, error: 'Error al guardar la configuración' }
+  } catch (e) {
+    return authErrorResult(e) ?? { success: false, error: 'Error al guardar la configuración' }
   }
 }

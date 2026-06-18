@@ -1,11 +1,10 @@
 'use server'
 
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { requireEditor } from '@/lib/auth-guards'
 import type { ActionResult } from '@/types'
 
 const createSectionSchema = z.object({
@@ -25,15 +24,8 @@ const updateSectionSchema = z.object({
   sortOrder: z.coerce.number().int().default(0),
   isVisible: z.boolean().default(true),
   heroImage: z.string().url().optional().nullable(),
+  navLabel: z.string().max(60).optional().nullable(),
 })
-
-async function requireEditor() {
-  const session = await getServerSession(authOptions)
-  if (!session) throw new Error('No autorizado')
-  const role = (session.user as { role?: string })?.role
-  if (role === 'VIEWER') throw new Error('No autorizado')
-  return session
-}
 
 export async function createSection(_prevState: ActionResult | null, formData: FormData): Promise<ActionResult> {
   try {
@@ -83,6 +75,7 @@ export async function updateSection(
     sortOrder: number
     isVisible: boolean
     heroImage?: string | null
+    navLabel?: string | null
   }
 ): Promise<ActionResult> {
   try {

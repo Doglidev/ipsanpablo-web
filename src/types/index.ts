@@ -25,9 +25,7 @@ export interface ListData {
   items: string[]
 }
 
-export interface DividerData {
-  // empty
-}
+export type DividerData = Record<string, never>
 
 export interface VideoData {
   url: string

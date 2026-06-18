@@ -1,12 +1,11 @@
 'use server'
 
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 import { uploadToCloudinary, deleteFromCloudinary } from '@/lib/cloudinary'
 import { VALID_ALBUMS } from '@/lib/gallery-sections'
+import { requireEditor } from '@/lib/auth-guards'
 import type { ActionResult } from '@/types'
 
 const uploadSchema = z.object({
@@ -18,12 +17,6 @@ const updateSchema = z.object({
   caption: z.string().max(200).optional(),
   album: z.enum(VALID_ALBUMS),
 })
-
-async function requireSession() {
-  const session = await getServerSession(authOptions)
-  if (!session) throw new Error('No autorizado')
-  return session
-}
 
 function revalidateAll() {
   revalidatePath('/admin/galeria')
@@ -39,7 +32,7 @@ function revalidateAll() {
 
 export async function uploadGalleryImage(formData: FormData): Promise<ActionResult> {
   try {
-    await requireSession()
+    await requireEditor()
 
     const file = formData.get('file') as File | null
     if (!file || file.size === 0) {
@@ -92,7 +85,7 @@ export async function updateGalleryImage(
   data: { caption?: string; album: string }
 ): Promise<ActionResult> {
   try {
-    await requireSession()
+    await requireEditor()
 
     const parsed = updateSchema.safeParse(data)
     if (!parsed.success) {
@@ -120,7 +113,7 @@ export async function updateGalleryImage(
 
 export async function deleteGalleryImage(id: string): Promise<ActionResult> {
   try {
-    await requireSession()
+    await requireEditor()
 
     const image = await prisma.galleryImage.findUnique({ where: { id } })
     if (!image) return { success: false, error: 'Imagen no encontrada' }

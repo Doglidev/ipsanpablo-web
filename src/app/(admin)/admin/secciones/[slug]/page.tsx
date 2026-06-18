@@ -9,9 +9,14 @@ interface SectionEditorPageProps {
 
 const SectionEditorPage = async ({ params }: SectionEditorPageProps) => {
   const { slug } = await params
-  const section = await prisma.section.findUnique({ where: { slug } })
+  const [section, navGroups] = await Promise.all([
+    prisma.section.findUnique({ where: { slug } }),
+    prisma.navGroup.findMany({ orderBy: { sortOrder: 'asc' } }),
+  ])
 
   if (!section) notFound()
+
+  const groups = navGroups.map((g) => ({ slug: g.slug, label: g.label }))
 
   return (
     <div>
@@ -36,7 +41,7 @@ const SectionEditorPage = async ({ params }: SectionEditorPageProps) => {
         </a>
       </div>
 
-      <SectionEditorClient section={section} />
+      <SectionEditorClient section={section} groups={groups} />
     </div>
   )
 }

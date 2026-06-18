@@ -34,6 +34,28 @@ model Section {
   sortOrder Int      @default(0)
   isVisible Boolean  @default(true)
   heroImage String?
+  // URL pública donde se muestra la sección. Si es null, se asume /seccion/{slug}.
+  // Las páginas con ruta propia (ej. /niveles/inicial) la setean explícitamente.
+  navPath   String?
+  // Etiqueta corta para el menú. Si es null, se usa `title`.
+  navLabel  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Grupo del navbar. Las secciones se asocian por `Section.pageGroup == NavGroup.slug`.
+// Reglas de render (ver src/lib/nav.ts):
+//   - grupo no visible o sin items visibles  -> no aparece
+//   - 1 item visible                          -> link directo
+//   - 2+ items visibles                       -> dropdown
+//   - `href` permite grupos que son páginas funcionales sin secciones (Noticias, Contacto)
+model NavGroup {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  label     String
+  href      String?
+  sortOrder Int      @default(0)
+  isVisible Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -61,8 +83,8 @@ model NewsArticle {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  authorId String
-  author   User   @relation(fields: [authorId], references: [id])
+  authorId String?
+  author   User?   @relation(fields: [authorId], references: [id], onDelete: SetNull)
 }
 
 model SiteConfig {

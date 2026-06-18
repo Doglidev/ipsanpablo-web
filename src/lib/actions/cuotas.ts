@@ -2,6 +2,8 @@
 
 import { z } from 'zod'
 import { Resend } from 'resend'
+import { escapeHtml } from '@/lib/escape-html'
+import { rateLimit, getClientIp } from '@/lib/rate-limit'
 import type { ActionResult } from '@/types'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
@@ -15,6 +17,20 @@ const cuotasSchema = z.object({
 })
 
 export async function submitActualizacionCuotas(formData: FormData): Promise<ActionResult> {
+  // Honeypot: campo oculto con nombre neutro (ver contact.ts) para no chocar
+  // con el autocompletado del navegador.
+  if (formData.get('hp_field')) {
+    console.warn('[cuotas] descartado por honeypot')
+    return { success: true }
+  }
+
+  // Rate limit: máx. 5 envíos cada 10 minutos por IP.
+  const ip = await getClientIp()
+  const { allowed } = await rateLimit(`cuotas:${ip}`, { limit: 5, windowMs: 10 * 60 * 1000 })
+  if (!allowed) {
+    return { success: false, error: 'Demasiados envíos. Esperá unos minutos e intentá de nuevo.' }
+  }
+
   const cuotas = formData.getAll('cuotas').map(String)
 
   const parsed = cuotasSchema.safeParse({
@@ -39,11 +55,11 @@ export async function submitActualizacionCuotas(formData: FormData): Promise<Act
     subject: `Actualización de cuotas - ${alumnoNombre}`,
     html: `
       <h2>Solicitud de actualización de cuotas</h2>
-      <p><strong>Alumno:</strong> ${alumnoNombre}</p>
-      <p><strong>Email de contacto:</strong> ${email}</p>
-      <p><strong>Cuota/s a actualizar:</strong> ${cuotas.join(', ')}</p>
-      <p><strong>Fecha de pago:</strong> ${fechaPago}</p>
-      ${comentarios ? `<p><strong>Comentarios:</strong></p><p style="white-space: pre-wrap;">${comentarios}</p>` : ''}
+      <p><strong>Alumno:</strong> ${escapeHtml(alumnoNombre)}</p>
+      <p><strong>Email de contacto:</strong> ${escapeHtml(email)}</p>
+      <p><strong>Cuota/s a actualizar:</strong> ${escapeHtml(cuotas.join(', '))}</p>
+      <p><strong>Fecha de pago:</strong> ${escapeHtml(fechaPago)}</p>
+      ${comentarios ? `<p><strong>Comentarios:</strong></p><p style="white-space: pre-wrap;">${escapeHtml(comentarios)}</p>` : ''}
     `,
   })
 

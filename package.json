@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "prisma generate && prisma migrate deploy && next build",
+    "dev": "node --max-old-space-size=4096 node_modules/next/dist/bin/next dev",
+    "build": "prisma generate && next build",
+    "build:migrate": "prisma generate && prisma migrate deploy && next build",
     "start": "next start",
     "lint": "eslint",
     "seed": "ts-node prisma/seed.ts"
@@ -14,6 +15,8 @@
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
+    "@upstash/ratelimit": "^2.0.8",
+    "@upstash/redis": "^1.38.0",
     "bcryptjs": "^3.0.3",
     "cloudinary": "^2.9.0",
     "next": "^16.2.6",

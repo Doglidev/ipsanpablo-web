@@ -3,98 +3,17 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useState } from 'react'
-
-const NAV_LINKS = [
-  {
-    label: 'Institucional',
-    href: '/institucional/nuestra-escuela',
-    pageGroup: 'institucional',
-    children: [
-      { label: 'Nuestra Escuela', href: '/institucional/nuestra-escuela' },
-      { label: 'Autoridades', href: '/institucional/autoridades' },
-      { label: 'Galería', href: '/institucional/galeria' },
-    ],
-  },
-  {
-    label: 'Niveles',
-    href: '/niveles/inicial',
-    pageGroup: 'niveles',
-    children: [
-      { label: 'Inicial', href: '/niveles/inicial' },
-      { label: 'Primario', href: '/niveles/primario' },
-      { label: 'Secundario', href: '/niveles/secundario' },
-    ],
-  },
-  { label: 'Becas', href: '/becas' },
-  {
-    label: 'Pasantías',
-    href: '/pasantias/objetivo',
-    pageGroup: 'pasantias',
-    children: [
-      { label: 'Objetivo', href: '/pasantias/objetivo' },
-      { label: 'Espacios Curriculares', href: '/pasantias/espacios-curriculares' },
-      { label: 'Lugares', href: '/pasantias/lugares' },
-      { label: 'Monitoreo y Evaluación', href: '/pasantias/monitoreo' },
-    ],
-  },
-  {
-    label: 'Secretarías',
-    href: '/secretarias/inicial-primario',
-    pageGroup: 'secretarias',
-    children: [
-      { label: 'Inicial y Primario', href: '/secretarias/inicial-primario' },
-      { label: 'Secundario', href: '/secretarias/secundario' },
-    ],
-  },
-  { label: 'Administración', href: '/administracion' },
-  {
-    label: 'Pastoral',
-    href: '/pastoral/info',
-    pageGroup: 'pastoral',
-    children: [
-      { label: 'Información', href: '/pastoral/info' },
-      { label: 'Galería', href: '/pastoral/galeria' },
-    ],
-  },
-  { label: 'Noticias', href: '/noticias' },
-  { label: 'Contacto', href: '/contacto' },
-]
-
-// Slugs de secciones existentes que ya están representadas en el navbar hardcodeado.
-// Solo las secciones cuyo slug NO esté aquí se agregan dinámicamente.
-const EXISTING_SLUGS = new Set([
-  'nuestra-escuela', 'autoridades', 'galeria-institucional',
-  'nivel-inicial', 'nivel-primario', 'nivel-secundario',
-  'becas',
-  'pasantias-objetivo', 'pasantias-espacios-curriculares', 'pasantias-lugares', 'pasantias-monitoreo',
-  'secretaria-inicial-primario', 'secretaria-secundario',
-  'administracion',
-  'pastoral-info', 'pastoral-galeria',
-])
-
-interface NavSection {
-  slug: string
-  title: string
-  pageGroup: string
-}
+import type { NavTopItem } from '@/lib/nav'
 
 interface NavbarProps {
   logoUrl: string | null
   schoolName: string
-  sections?: NavSection[]
+  groups?: NavTopItem[]
 }
 
-const Navbar = ({ logoUrl, schoolName, sections = [] }: NavbarProps) => {
+const Navbar = ({ logoUrl, schoolName, groups = [] }: NavbarProps) => {
   const [menuOpen, setMenuOpen] = useState(false)
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
-
-  const getChildren = (link: typeof NAV_LINKS[number]) => {
-    if (!('children' in link) || !('pageGroup' in link)) return []
-    const extras = sections
-      .filter((s) => s.pageGroup === link.pageGroup && !EXISTING_SLUGS.has(s.slug))
-      .map((s) => ({ label: s.title, href: `/seccion/${s.slug}` }))
-    return [...(link.children ?? []), ...extras]
-  }
 
   return (
     <nav className="bg-white shadow-md sticky top-0 z-50">
@@ -120,28 +39,28 @@ const Navbar = ({ logoUrl, schoolName, sections = [] }: NavbarProps) => {
 
           {/* Desktop nav */}
           <div className="hidden lg:flex items-center gap-1">
-            {NAV_LINKS.map((link) =>
-              link.children ? (
-                <div key={link.label} className="relative group">
+            {groups.map((group) =>
+              group.children.length > 0 ? (
+                <div key={group.key} className="relative group">
                   <button
                     className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-school-blue rounded-md flex items-center gap-1"
-                    onMouseEnter={() => setOpenDropdown(link.label)}
+                    onMouseEnter={() => setOpenDropdown(group.key)}
                     onMouseLeave={() => setOpenDropdown(null)}
                   >
-                    {link.label}
+                    {group.label}
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
                   </button>
-                  {openDropdown === link.label && (
+                  {openDropdown === group.key && (
                     <div
                       className="absolute top-full left-0 bg-white shadow-lg rounded-md py-1 min-w-48 z-50"
-                      onMouseEnter={() => setOpenDropdown(link.label)}
+                      onMouseEnter={() => setOpenDropdown(group.key)}
                       onMouseLeave={() => setOpenDropdown(null)}
                     >
-                      {getChildren(link).map((child) => (
+                      {group.children.map((child) => (
                         <Link
-                          key={child.href}
+                          key={child.key}
                           href={child.href}
                           className="block px-4 py-2 text-sm text-gray-700 hover:bg-school-blue hover:text-white"
                         >
@@ -153,11 +72,11 @@ const Navbar = ({ logoUrl, schoolName, sections = [] }: NavbarProps) => {
                 </div>
               ) : (
                 <Link
-                  key={link.label}
-                  href={link.href}
+                  key={group.key}
+                  href={group.href}
                   className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-school-blue rounded-md"
                 >
-                  {link.label}
+                  {group.label}
                 </Link>
               )
             )}
@@ -183,23 +102,23 @@ const Navbar = ({ logoUrl, schoolName, sections = [] }: NavbarProps) => {
       {/* Mobile menu */}
       {menuOpen && (
         <div className="lg:hidden bg-white border-t">
-          {NAV_LINKS.map((link) =>
-            link.children ? (
-              <div key={link.label}>
+          {groups.map((group) =>
+            group.children.length > 0 ? (
+              <div key={group.key}>
                 <button
                   className="w-full text-left px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 flex justify-between items-center"
-                  onClick={() => setOpenDropdown(openDropdown === link.label ? null : link.label)}
+                  onClick={() => setOpenDropdown(openDropdown === group.key ? null : group.key)}
                 >
-                  {link.label}
+                  {group.label}
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={openDropdown === link.label ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"} />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={openDropdown === group.key ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"} />
                   </svg>
                 </button>
-                {openDropdown === link.label && (
+                {openDropdown === group.key && (
                   <div className="pl-4 bg-gray-50">
-                    {getChildren(link).map((child) => (
+                    {group.children.map((child) => (
                       <Link
-                        key={child.href}
+                        key={child.key}
                         href={child.href}
                         className="block px-4 py-2 text-sm text-gray-600 hover:text-school-blue"
                         onClick={() => setMenuOpen(false)}
@@ -212,12 +131,12 @@ const Navbar = ({ logoUrl, schoolName, sections = [] }: NavbarProps) => {
               </div>
             ) : (
               <Link
-                key={link.label}
-                href={link.href}
+                key={group.key}
+                href={group.href}
                 className="block px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-school-blue"
                 onClick={() => setMenuOpen(false)}
               >
-                {link.label}
+                {group.label}
               </Link>
             )
           )}

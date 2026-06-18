@@ -12,17 +12,24 @@ interface Section {
   sortOrder: number
   isVisible: boolean
   heroImage: string | null
+  navLabel: string | null
 }
 
 interface SectionEditorClientProps {
   section: Section
+  groups: { slug: string; label: string }[]
 }
 
-const PAGE_GROUPS = ['institucional', 'niveles', 'becas', 'pasantias', 'secretarias', 'pastoral']
+const SectionEditorClient = ({ section, groups }: SectionEditorClientProps) => {
+  // Si el grupo actual de la sección ya no figura en la lista, lo agregamos para
+  // no perder la selección.
+  const groupOptions = groups.some((g) => g.slug === section.pageGroup)
+    ? groups
+    : [{ slug: section.pageGroup, label: section.pageGroup }, ...groups]
 
-const SectionEditorClient = ({ section }: SectionEditorClientProps) => {
   const [meta, setMeta] = useState({
     title: section.title,
+    navLabel: section.navLabel ?? '',
     pageGroup: section.pageGroup,
     sortOrder: section.sortOrder,
     isVisible: section.isVisible,
@@ -37,6 +44,7 @@ const SectionEditorClient = ({ section }: SectionEditorClientProps) => {
       sortOrder: meta.sortOrder,
       isVisible: meta.isVisible,
       heroImage: meta.heroImage || null,
+      navLabel: meta.navLabel.trim() || null,
     })
   }
 
@@ -65,6 +73,20 @@ const SectionEditorClient = ({ section }: SectionEditorClientProps) => {
               value={meta.title}
               onChange={(e) => setMeta((m) => ({ ...m, title: e.target.value }))}
             />
+            <p className="text-xs text-gray-400 mt-1">Se muestra como título de la página.</p>
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-gray-500 mb-1">Etiqueta del menú</label>
+            <input
+              className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-school-blue"
+              value={meta.navLabel}
+              onChange={(e) => setMeta((m) => ({ ...m, navLabel: e.target.value }))}
+              placeholder={meta.title || 'Igual que el título'}
+            />
+            <p className="text-xs text-gray-400 mt-1">
+              Texto corto para el menú. Si lo dejás vacío, se usa el título.
+            </p>
           </div>
 
           <div>
@@ -74,8 +96,8 @@ const SectionEditorClient = ({ section }: SectionEditorClientProps) => {
               value={meta.pageGroup}
               onChange={(e) => setMeta((m) => ({ ...m, pageGroup: e.target.value }))}
             >
-              {PAGE_GROUPS.map((g) => (
-                <option key={g} value={g}>{g}</option>
+              {groupOptions.map((g) => (
+                <option key={g.slug} value={g.slug}>{g.label}</option>
               ))}
             </select>
           </div>

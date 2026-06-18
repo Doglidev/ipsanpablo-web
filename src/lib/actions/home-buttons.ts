@@ -1,9 +1,8 @@
 'use server'
 
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
+import { requireEditor, authErrorResult } from '@/lib/auth-guards'
 import type { ActionResult } from '@/types'
 
 export interface HomeButtonInput {
@@ -17,8 +16,7 @@ export interface HomeButtonInput {
 
 export async function saveHomeButtons(buttons: HomeButtonInput[]): Promise<ActionResult> {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session) return { success: false, error: 'No autorizado' }
+    await requireEditor()
 
     await prisma.$transaction(async (tx) => {
       await tx.homeButton.deleteMany()
@@ -39,7 +37,7 @@ export async function saveHomeButtons(buttons: HomeButtonInput[]): Promise<Actio
     revalidatePath('/')
     revalidatePath('/admin/botones-home')
     return { success: true }
-  } catch {
-    return { success: false, error: 'Error al guardar los botones' }
+  } catch (e) {
+    return authErrorResult(e) ?? { success: false, error: 'Error al guardar los botones' }
   }
 }

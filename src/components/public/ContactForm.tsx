@@ -23,6 +23,15 @@ const ContactForm = () => {
 
   return (
     <form ref={formRef} onSubmit={handleSubmit} className="space-y-5">
+      {/* Honeypot anti-spam: oculto para humanos, lo completan los bots */}
+      <input
+        type="text"
+        name="hp_field"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        className="absolute -left-[9999px] h-0 w-0 opacity-0"
+      />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div>
           <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">

@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server'
 // Rutas que requieren rol ADMIN o EDITOR (no VIEWER)
 const EDITOR_ROUTES = [
   '/admin/secciones',
+  '/admin/grupos',
   '/admin/noticias',
   '/admin/galeria',
   '/admin/configuracion',

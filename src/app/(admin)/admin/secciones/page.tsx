@@ -3,16 +3,6 @@ import { prisma } from '@/lib/prisma'
 import SectionDeleteButton from '@/components/admin/SectionDeleteButton'
 import SectionVisibilityToggle from '@/components/admin/SectionVisibilityToggle'
 
-const PAGE_GROUPS = [
-  { value: '', label: 'Todos' },
-  { value: 'institucional', label: 'Institucional' },
-  { value: 'niveles', label: 'Niveles' },
-  { value: 'becas', label: 'Becas' },
-  { value: 'pasantias', label: 'Pasantías' },
-  { value: 'secretarias', label: 'Secretarías' },
-  { value: 'pastoral', label: 'Pastoral' },
-]
-
 interface SeccionesPageProps {
   searchParams: Promise<{ grupo?: string }>
 }
@@ -20,10 +10,19 @@ interface SeccionesPageProps {
 const SeccionesPage = async ({ searchParams }: SeccionesPageProps) => {
   const { grupo } = await searchParams
 
-  const sections = await prisma.section.findMany({
-    where: grupo ? { pageGroup: grupo } : undefined,
-    orderBy: [{ pageGroup: 'asc' }, { sortOrder: 'asc' }],
-  })
+  const [sections, navGroups] = await Promise.all([
+    prisma.section.findMany({
+      where: grupo ? { pageGroup: grupo } : undefined,
+      orderBy: [{ pageGroup: 'asc' }, { sortOrder: 'asc' }],
+    }),
+    prisma.navGroup.findMany({ orderBy: { sortOrder: 'asc' } }),
+  ])
+
+  const PAGE_GROUPS = [
+    { value: '', label: 'Todos' },
+    ...navGroups.map((g) => ({ value: g.slug, label: g.label })),
+  ]
+  const groupLabels = new Map(navGroups.map((g) => [g.slug, g.label]))
 
   // Group by pageGroup for display
   const grouped = sections.reduce<Record<string, typeof sections>>((acc, s) => {
@@ -77,7 +76,7 @@ const SeccionesPage = async ({ searchParams }: SeccionesPageProps) => {
           {Object.entries(grouped).map(([group, items]) => (
             <div key={group}>
               <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 px-1">
-                {group}
+                {groupLabels.get(group) ?? group}
               </h2>
               <div className="bg-white rounded-xl border divide-y">
                 {items.map((section) => (

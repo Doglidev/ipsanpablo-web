@@ -207,15 +207,34 @@ const BlockItem = ({ block }: { block: ContentBlock }) => {
   }
 }
 
+// Solo se permiten embeds de proveedores conocidos (allowlist). Cualquier otra
+// URL se rechaza para evitar que un editor incruste un iframe arbitrario
+// (clickjacking / phishing). El id se valida con una expresión regular antes
+// de construir la URL final.
+const YOUTUBE_ID = /^[a-zA-Z0-9_-]{6,20}$/
+const VIMEO_ID = /^\d+$/
+
 const toEmbedUrl = (url: string): string | null => {
   try {
     const u = new URL(url)
-    if (u.hostname.includes('youtube.com') || u.hostname.includes('youtu.be')) {
-      const id = u.searchParams.get('v') ?? u.pathname.split('/').filter(Boolean).pop() ?? ''
-      if (!id) return null
-      return `https://www.youtube.com/embed/${id}`
+    const host = u.hostname.replace(/^www\./, '')
+
+    if (host === 'youtube.com' || host === 'm.youtube.com' || host === 'youtu.be' || host === 'youtube-nocookie.com') {
+      const id =
+        host === 'youtu.be'
+          ? u.pathname.split('/').filter(Boolean).pop() ?? ''
+          : u.searchParams.get('v') ?? u.pathname.split('/').filter(Boolean).pop() ?? ''
+      if (!YOUTUBE_ID.test(id)) return null
+      return `https://www.youtube-nocookie.com/embed/${id}`
     }
-    return url
+
+    if (host === 'vimeo.com' || host === 'player.vimeo.com') {
+      const id = u.pathname.split('/').filter(Boolean).pop() ?? ''
+      if (!VIMEO_ID.test(id)) return null
+      return `https://player.vimeo.com/video/${id}`
+    }
+
+    return null
   } catch {
     return null
   }

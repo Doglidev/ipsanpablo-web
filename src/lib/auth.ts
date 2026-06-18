@@ -2,6 +2,7 @@ import { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
+import { rateLimit, getClientIp } from '@/lib/rate-limit'
 
 export const authOptions: NextAuthOptions = {
   session: {
@@ -16,6 +17,13 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null
+
+        // Rate limit anti fuerza bruta: máx. 10 intentos cada 5 minutos por IP.
+        const ip = await getClientIp()
+        const { allowed } = await rateLimit(`login:${ip}`, { limit: 10, windowMs: 5 * 60 * 1000 })
+        if (!allowed) {
+          throw new Error('Demasiados intentos. Esperá unos minutos e intentá de nuevo.')
+        }
 
         const user = await prisma.user.findUnique({
           where: { email: credentials.email },

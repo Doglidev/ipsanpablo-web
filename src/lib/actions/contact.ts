@@ -2,6 +2,8 @@
 
 import { z } from 'zod'
 import { Resend } from 'resend'
+import { escapeHtml } from '@/lib/escape-html'
+import { rateLimit, getClientIp } from '@/lib/rate-limit'
 import type { ActionResult } from '@/types'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
@@ -15,6 +17,21 @@ const contactSchema = z.object({
 })
 
 export async function sendContactForm(formData: FormData): Promise<ActionResult> {
+  // Honeypot: campo oculto que solo completan los bots. Se usa un nombre neutro
+  // (no "website"/"url"/"email") para que el autocompletado del navegador no lo
+  // complete por error y descarte un mensaje legítimo.
+  if (formData.get('hp_field')) {
+    console.warn('[contacto] descartado por honeypot')
+    return { success: true } // fingimos éxito para no dar pistas al bot
+  }
+
+  // Rate limit: máx. 5 envíos cada 10 minutos por IP.
+  const ip = await getClientIp()
+  const { allowed } = await rateLimit(`contact:${ip}`, { limit: 5, windowMs: 10 * 60 * 1000 })
+  if (!allowed) {
+    return { success: false, error: 'Demasiados envíos. Esperá unos minutos e intentá de nuevo.' }
+  }
+
   const parsed = contactSchema.safeParse({
     name: formData.get('name'),
     email: formData.get('email'),
@@ -36,12 +53,12 @@ export async function sendContactForm(formData: FormData): Promise<ActionResult>
     subject: subject ? `Contacto: ${subject}` : `Nuevo mensaje de contacto de ${name}`,
     html: `
       <h2>Nuevo mensaje de contacto</h2>
-      <p><strong>Nombre:</strong> ${name}</p>
-      <p><strong>Email:</strong> ${email}</p>
-      ${phone ? `<p><strong>Teléfono:</strong> ${phone}</p>` : ''}
-      ${subject ? `<p><strong>Asunto:</strong> ${subject}</p>` : ''}
+      <p><strong>Nombre:</strong> ${escapeHtml(name)}</p>
+      <p><strong>Email:</strong> ${escapeHtml(email)}</p>
+      ${phone ? `<p><strong>Teléfono:</strong> ${escapeHtml(phone)}</p>` : ''}
+      ${subject ? `<p><strong>Asunto:</strong> ${escapeHtml(subject)}</p>` : ''}
       <p><strong>Mensaje:</strong></p>
-      <p style="white-space: pre-wrap;">${message}</p>
+      <p style="white-space: pre-wrap;">${escapeHtml(message)}</p>
     `,
   })
 

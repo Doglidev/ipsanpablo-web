@@ -1,3 +1,7 @@
+// LEGACY: sirve PDFs que quedaron guardados en la base (modelo StoredPdf).
+// Las subidas nuevas van a Cloudinary (ver src/lib/actions/upload-pdf.ts).
+// Se mantiene esta ruta para no romper los botones del home que todavía
+// apuntan a /api/pdf/<id>.
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 

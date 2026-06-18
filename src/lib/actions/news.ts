@@ -1,11 +1,10 @@
 'use server'
 
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { requireEditor } from '@/lib/auth-guards'
 import type { ActionResult } from '@/types'
 
 const createNewsSchema = z.object({
@@ -29,17 +28,11 @@ const updateNewsSchema = z.object({
   isPublished: z.boolean(),
 })
 
-async function requireSession() {
-  const session = await getServerSession(authOptions)
-  if (!session) throw new Error('No autorizado')
-  return session
-}
-
 export async function createNews(_prevState: ActionResult | null, formData: FormData): Promise<ActionResult> {
   let newId: string
 
   try {
-    const session = await requireSession()
+    const session = await requireEditor()
 
     const raw = {
       title: formData.get('title'),
@@ -87,7 +80,7 @@ export async function updateNews(
   }
 ): Promise<ActionResult> {
   try {
-    await requireSession()
+    await requireEditor()
 
     const parsed = updateNewsSchema.safeParse(data)
     if (!parsed.success) {
@@ -127,7 +120,7 @@ export async function updateNews(
 
 export async function deleteNews(id: string): Promise<ActionResult> {
   try {
-    await requireSession()
+    await requireEditor()
     await prisma.newsArticle.delete({ where: { id } })
     revalidatePath('/admin/noticias')
     return { success: true }

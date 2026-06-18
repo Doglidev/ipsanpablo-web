@@ -25,7 +25,7 @@ const NewsEditorPage = async ({ params }: NewsEditorPageProps) => {
           </Link>
           <h1 className="text-2xl font-bold text-gray-900 mt-1 line-clamp-1">{article.title}</h1>
           <p className="text-xs text-gray-400 mt-0.5">
-            Por {article.author.name} ·{' '}
+            Por {article.author?.name ?? 'Sin autor'} ·{' '}
             {article.isPublished ? (
               <span className="text-green-600">Publicada</span>
             ) : (

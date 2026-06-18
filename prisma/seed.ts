@@ -476,6 +476,46 @@ async function main() {
     },
   ]
 
+  // Ruta pública de cada sección con página propia (las demás usan /seccion/{slug}).
+  const navPaths: Record<string, string> = {
+    'nuestra-escuela': '/institucional/nuestra-escuela',
+    'autoridades': '/institucional/autoridades',
+    'galeria-institucional': '/institucional/galeria',
+    'nivel-inicial': '/niveles/inicial',
+    'nivel-primario': '/niveles/primario',
+    'nivel-secundario': '/niveles/secundario',
+    'becas': '/becas',
+    'pasantias-objetivo': '/pasantias/objetivo',
+    'pasantias-espacios-curriculares': '/pasantias/espacios-curriculares',
+    'pasantias-lugares': '/pasantias/lugares',
+    'pasantias-monitoreo': '/pasantias/monitoreo',
+    'secretaria-inicial-primario': '/secretarias/inicial-primario',
+    'secretaria-secundario': '/secretarias/secundario',
+    'administracion': '/administracion',
+    'pastoral-info': '/pastoral/info',
+    'pastoral-galeria': '/pastoral/galeria',
+  }
+
+  // Etiqueta corta del menú (cae a `title` si no está).
+  const navLabels: Record<string, string> = {
+    'nuestra-escuela': 'Nuestra Escuela',
+    'autoridades': 'Autoridades',
+    'galeria-institucional': 'Galería',
+    'nivel-inicial': 'Inicial',
+    'nivel-primario': 'Primario',
+    'nivel-secundario': 'Secundario',
+    'becas': 'Becas',
+    'pasantias-objetivo': 'Objetivo',
+    'pasantias-espacios-curriculares': 'Espacios Curriculares',
+    'pasantias-lugares': 'Lugares',
+    'pasantias-monitoreo': 'Monitoreo y Evaluación',
+    'secretaria-inicial-primario': 'Inicial y Primario',
+    'secretaria-secundario': 'Secundario',
+    'administracion': 'Administración',
+    'pastoral-info': 'Información',
+    'pastoral-galeria': 'Galería',
+  }
+
   for (const section of sections) {
     await prisma.section.upsert({
       where: { slug: section.slug },
@@ -484,12 +524,39 @@ async function main() {
         content: section.content,
         pageGroup: section.pageGroup,
         sortOrder: section.sortOrder,
+        navPath: navPaths[section.slug] ?? null,
+        navLabel: navLabels[section.slug] ?? null,
       },
-      create: section,
+      create: {
+        ...section,
+        navPath: navPaths[section.slug] ?? null,
+        navLabel: navLabels[section.slug] ?? null,
+      },
     })
     console.log(`  ✓ ${section.slug}`)
   }
   console.log(`Upserted ${sections.length} sections`)
+
+  // Grupos del navbar
+  const navGroups = [
+    { slug: 'institucional',  label: 'Institucional',  href: null,         sortOrder: 0 },
+    { slug: 'niveles',        label: 'Niveles',        href: null,         sortOrder: 1 },
+    { slug: 'becas',          label: 'Becas',          href: null,         sortOrder: 2 },
+    { slug: 'pasantias',      label: 'Pasantías',      href: null,         sortOrder: 3 },
+    { slug: 'secretarias',    label: 'Secretarías',    href: null,         sortOrder: 4 },
+    { slug: 'administracion', label: 'Administración', href: null,         sortOrder: 5 },
+    { slug: 'pastoral',       label: 'Pastoral',       href: null,         sortOrder: 6 },
+    { slug: 'noticias',       label: 'Noticias',       href: '/noticias',  sortOrder: 7 },
+    { slug: 'contacto',       label: 'Contacto',       href: '/contacto',  sortOrder: 8 },
+  ]
+  for (const g of navGroups) {
+    await prisma.navGroup.upsert({
+      where: { slug: g.slug },
+      update: { label: g.label, href: g.href, sortOrder: g.sortOrder },
+      create: g,
+    })
+  }
+  console.log(`Upserted ${navGroups.length} nav groups`)
 }
 
 main()

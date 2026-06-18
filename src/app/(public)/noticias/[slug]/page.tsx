@@ -59,7 +59,7 @@ const NoticiaPage = async ({ params }: NoticiaPageProps) => {
           )}
           <span className="text-sm text-gray-400">·</span>
           <span className="text-sm text-gray-500">
-            Por {article.author.name}
+            Por {article.author?.name ?? 'Instituto San Pablo'}
           </span>
         </div>
 

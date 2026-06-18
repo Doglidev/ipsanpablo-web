@@ -2,6 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
 import HomeContactForm from '@/components/public/HomeContactForm'
+import { toDownloadUrl } from '@/lib/pdf-url'
 
 export const revalidate = 60
 
@@ -264,7 +265,7 @@ const HomePage = async () => {
               {homeButtons.map((btn, i) => (
                 <a
                   key={i}
-                  href={btn.fileUrl}
+                  href={toDownloadUrl(btn.fileUrl, btn.downloadName)}
                   download={btn.downloadName || btn.label}
                   className={`group flex items-center gap-3 ${BUTTON_COLORS[btn.color] ?? BUTTON_COLORS.sky} text-white rounded-xl px-5 py-4 font-semibold text-sm transition-colors shadow-sm`}
                 >
