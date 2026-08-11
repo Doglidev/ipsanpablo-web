@@ -192,6 +192,16 @@ const BlockEditor = ({ initialContent, onSave, saveLabel = 'Guardar' }: BlockEdi
 const inputClass = 'w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-school-blue'
 const labelClass = 'block text-xs font-medium text-gray-500 mb-1'
 
+// Recordatorio de la sintaxis de enlaces que interpreta RichText en el sitio público.
+const LinkHint = () => (
+  <p className="text-xs text-gray-400 mt-1.5 leading-relaxed">
+    Pegá la dirección tal cual (<code className="bg-gray-100 text-gray-600 px-1 py-0.5 rounded">www.facebook.com</code>,{' '}
+    <code className="bg-gray-100 text-gray-600 px-1 py-0.5 rounded">info@ipsanpablo.edu.ar</code>) y se vuelve
+    clickeable sola. Si querés que se vea otro texto, escribí{' '}
+    <code className="bg-gray-100 text-gray-600 px-1 py-0.5 rounded">[Seguinos en Facebook](www.facebook.com)</code>.
+  </p>
+)
+
 interface BlockFieldsProps {
   block: ContentBlock
   onChange: (data: ContentBlock['data']) => void
@@ -238,6 +248,7 @@ const BlockFields = ({ block, onChange }: BlockFieldsProps) => {
             onChange={(e) => onChange({ ...data, text: e.target.value })}
             placeholder="Escribí el párrafo..."
           />
+          <LinkHint />
         </div>
       )
     }
@@ -293,6 +304,7 @@ const BlockFields = ({ block, onChange }: BlockFieldsProps) => {
                 </div>
               ))}
             </div>
+            <LinkHint />
             <button
               onClick={() => onChange({ ...data, items: [...data.items, ''] })}
               className="mt-2 text-sm text-school-blue hover:text-school-gold font-medium"

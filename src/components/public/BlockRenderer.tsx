@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import RichText from './RichText'
 import type {
   BlockContent,
   ContentBlock,
@@ -60,7 +61,7 @@ const BlockItem = ({ block }: { block: ContentBlock }) => {
       const data = block.data as ParagraphData
       return (
         <p className="text-gray-700 leading-relaxed mb-4">
-          {data.text}
+          <RichText text={data.text} />
         </p>
       )
     }
@@ -82,7 +83,7 @@ const BlockItem = ({ block }: { block: ContentBlock }) => {
             />
             {data.caption && (
               <figcaption className="text-center text-sm text-gray-500 mt-2">
-                {data.caption}
+                <RichText text={data.caption} />
               </figcaption>
             )}
           </figure>
@@ -103,7 +104,7 @@ const BlockItem = ({ block }: { block: ContentBlock }) => {
           </div>
           {data.caption && (
             <figcaption className="text-center text-sm text-gray-500 mt-2">
-              {data.caption}
+              <RichText text={data.caption} />
             </figcaption>
           )}
         </figure>
@@ -116,7 +117,9 @@ const BlockItem = ({ block }: { block: ContentBlock }) => {
         return (
           <ol className="list-decimal list-inside space-y-1.5 mb-4 text-gray-700">
             {data.items.map((item, i) => (
-              <li key={i}>{item}</li>
+              <li key={i}>
+                <RichText text={item} />
+              </li>
             ))}
           </ol>
         )
@@ -124,7 +127,9 @@ const BlockItem = ({ block }: { block: ContentBlock }) => {
       return (
         <ul className="list-disc list-inside space-y-1.5 mb-4 text-gray-700">
           {data.items.map((item, i) => (
-            <li key={i}>{item}</li>
+            <li key={i}>
+              <RichText text={item} />
+            </li>
           ))}
         </ul>
       )
@@ -151,7 +156,7 @@ const BlockItem = ({ block }: { block: ContentBlock }) => {
           </div>
           {data.caption && (
             <figcaption className="text-center text-sm text-gray-500 mt-2">
-              {data.caption}
+              <RichText text={data.caption} />
             </figcaption>
           )}
         </figure>
