@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import RichText from './RichText'
+import BlockGallery from './BlockGallery'
 import type {
   BlockContent,
   ContentBlock,
@@ -10,6 +11,7 @@ import type {
   VideoData,
   PartnersData,
   PartnerItem,
+  GalleryData,
 } from '@/types'
 
 interface BlockRendererProps {
@@ -203,6 +205,17 @@ const BlockItem = ({ block }: { block: ContentBlock }) => {
               </div>
             ))}
           </div>
+        </div>
+      )
+    }
+
+    case 'gallery': {
+      const data = block.data as GalleryData
+      const images = data.images?.filter((img) => img.url) ?? []
+      if (images.length === 0) return null
+      return (
+        <div className="not-prose my-10">
+          <BlockGallery images={images} columns={data.columns ?? 3} />
         </div>
       )
     }

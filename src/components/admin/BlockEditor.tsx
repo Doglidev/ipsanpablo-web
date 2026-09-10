@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition, useCallback, useRef } from 'react'
-import type { ContentBlock, HeadingData, ParagraphData, ImageData, ListData, VideoData, PartnersData } from '@/types'
+import type { ContentBlock, HeadingData, ParagraphData, ImageData, ListData, VideoData, PartnersData, GalleryData } from '@/types'
 import { uploadBlockImage } from '@/lib/actions/upload-block-image'
 
 interface BlockEditorProps {
@@ -20,6 +20,7 @@ const EMPTY_BLOCK_DATA: Record<ContentBlock['type'], ContentBlock['data']> = {
   divider: {} as Record<string, never>,
   video: { url: '', caption: '' } as VideoData,
   partners: { heading: 'Instituciones', items: [{ name: '', imageUrl: '' }] } as PartnersData,
+  gallery: { images: [], columns: 3 } as GalleryData,
 }
 
 const BLOCK_LABELS: Record<ContentBlock['type'], string> = {
@@ -30,6 +31,7 @@ const BLOCK_LABELS: Record<ContentBlock['type'], string> = {
   divider: 'Separador',
   video: 'Video',
   partners: 'Grid de Partners',
+  gallery: 'Galería de fotos',
 }
 
 const BlockEditor = ({ initialContent, onSave, saveLabel = 'Guardar' }: BlockEditorProps) => {
@@ -354,6 +356,11 @@ const BlockFields = ({ block, onChange }: BlockFieldsProps) => {
       return <PartnersBlockFields data={data} onChange={onChange} />
     }
 
+    case 'gallery': {
+      const data = block.data as GalleryData
+      return <GalleryBlockFields data={data} onChange={onChange} />
+    }
+
     default:
       return null
   }
@@ -592,6 +599,178 @@ const PartnerItemRow = ({ item, index, onUpdate, onRemove }: PartnerItemRowProps
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
         </svg>
       </button>
+    </div>
+  )
+}
+
+// ── Gallery block editor ───────────────────────────────────────────────────
+
+interface GalleryBlockFieldsProps {
+  data: GalleryData
+  onChange: (data: ContentBlock['data']) => void
+}
+
+const GalleryBlockFields = ({ data, onChange }: GalleryBlockFieldsProps) => {
+  const [uploadStatus, setUploadStatus] = useState<string | null>(null)
+  const [uploadError, setUploadError] = useState<string | null>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
+
+  const images = data.images ?? []
+  const columns = data.columns ?? 3
+
+  const handleFilesChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files || files.length === 0) return
+
+    setUploadError(null)
+    const fileList = Array.from(files)
+    const newUploaded: { url: string; caption?: string }[] = []
+    const errors: string[] = []
+
+    for (let i = 0; i < fileList.length; i++) {
+      setUploadStatus(`Subiendo ${i + 1}/${fileList.length}...`)
+      const formData = new FormData()
+      formData.append('file', fileList[i])
+      const result = await uploadBlockImage(formData)
+      if (result.success) {
+        newUploaded.push({ url: result.url, caption: '' })
+      } else {
+        errors.push(`${fileList[i].name}: ${result.error}`)
+      }
+    }
+
+    setUploadStatus(null)
+    if (fileRef.current) fileRef.current.value = ''
+
+    if (newUploaded.length > 0) {
+      onChange({
+        ...data,
+        images: [...images, ...newUploaded],
+      })
+    }
+
+    if (errors.length > 0) {
+      setUploadError(errors.join(' | '))
+    }
+  }
+
+  const updateCaption = (index: number, caption: string) => {
+    const nextImages = images.map((img, i) => (i === index ? { ...img, caption } : img))
+    onChange({ ...data, images: nextImages })
+  }
+
+  const moveImage = (index: number, direction: 'up' | 'down') => {
+    const target = direction === 'up' ? index - 1 : index + 1
+    if (target < 0 || target >= images.length) return
+    const nextImages = [...images]
+    ;[nextImages[index], nextImages[target]] = [nextImages[target], nextImages[index]]
+    onChange({ ...data, images: nextImages })
+  }
+
+  const removeImage = (index: number) => {
+    const nextImages = images.filter((_, i) => i !== index)
+    onChange({ ...data, images: nextImages })
+  }
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <label className={labelClass}>Columnas (pantalla grande)</label>
+        <select
+          className={inputClass}
+          value={columns}
+          onChange={(e) => onChange({ ...data, columns: Number(e.target.value) as 2 | 3 | 4 })}
+        >
+          <option value={2}>2 columnas</option>
+          <option value={3}>3 columnas</option>
+          <option value={4}>4 columnas</option>
+        </select>
+      </div>
+
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <label className={labelClass}>Fotos de la galería</label>
+          <button
+            type="button"
+            onClick={() => fileRef.current?.click()}
+            disabled={uploadStatus !== null}
+            className="px-3 py-1.5 text-xs font-medium rounded-lg border border-school-blue text-school-blue hover:bg-school-blue hover:text-white disabled:opacity-50 transition-colors"
+          >
+            {uploadStatus ?? '+ Subir fotos'}
+          </button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            multiple
+            className="hidden"
+            onChange={handleFilesChange}
+          />
+        </div>
+
+        {uploadError && <p className="text-xs text-red-500 mb-2">{uploadError}</p>}
+
+        {images.length === 0 ? (
+          <p className="text-sm text-gray-400 py-4 text-center bg-gray-50 rounded-lg border border-dashed">
+            Todavía no agregaste fotos.
+          </p>
+        ) : (
+          <div className="space-y-2">
+            {images.map((img, idx) => (
+              <div key={idx} className="flex gap-3 items-center bg-gray-50 rounded-lg p-2.5">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={img.url}
+                  alt={img.caption || `Foto ${idx + 1}`}
+                  className="w-14 h-14 object-cover rounded-lg border bg-white shrink-0"
+                />
+                <div className="flex-1 min-w-0">
+                  <input
+                    className={inputClass}
+                    value={img.caption ?? ''}
+                    onChange={(e) => updateCaption(idx, e.target.value)}
+                    placeholder="Pie de foto (opcional)..."
+                  />
+                </div>
+                <div className="flex items-center gap-1 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => moveImage(idx, 'up')}
+                    disabled={idx === 0}
+                    className="p-1.5 rounded text-gray-400 hover:text-gray-700 disabled:opacity-20"
+                    title="Subir"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => moveImage(idx, 'down')}
+                    disabled={idx === images.length - 1}
+                    className="p-1.5 rounded text-gray-400 hover:text-gray-700 disabled:opacity-20"
+                    title="Bajar"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => removeImage(idx)}
+                    className="p-1.5 rounded text-gray-400 hover:text-red-600"
+                    title="Eliminar foto"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

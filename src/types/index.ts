@@ -1,7 +1,7 @@
 export interface ContentBlock {
   id: string
-  type: 'heading' | 'paragraph' | 'image' | 'list' | 'divider' | 'video' | 'partners'
-  data: HeadingData | ParagraphData | ImageData | ListData | DividerData | VideoData | PartnersData
+  type: 'heading' | 'paragraph' | 'image' | 'list' | 'divider' | 'video' | 'partners' | 'gallery'
+  data: HeadingData | ParagraphData | ImageData | ListData | DividerData | VideoData | PartnersData | GalleryData
 }
 
 export interface HeadingData {
@@ -40,6 +40,17 @@ export interface PartnerItem {
 export interface PartnersData {
   heading?: string
   items: PartnerItem[]
+}
+
+export interface GalleryImageItem {
+  url: string
+  caption?: string
+}
+
+export interface GalleryData {
+  images: GalleryImageItem[]
+  /** Columnas en desktop. Mobile siempre 2. Default 3. */
+  columns?: 2 | 3 | 4
 }
 
 export interface BlockContent {

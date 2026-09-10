@@ -78,6 +78,12 @@ const BLOCKS = [
     description:
       'Muestra una grilla de logos de instituciones o empresas aliadas. Podés subir el logo de cada una y escribir su nombre. En pantallas grandes se muestran 5 columnas; en celular, 2. Ideal para secciones de "instituciones que nos acompañan".',
   },
+  {
+    type: 'Galería de fotos',
+    icon: '▦',
+    description:
+      'Muestra una grilla de varias fotos con visor a pantalla completa. Subí muchas imágenes de una vez, ordenálas y elegí 2, 3 o 4 columnas. Se puede colocar en cualquier parte de la página.',
+  },
 ]
 
 const FAQS = [
