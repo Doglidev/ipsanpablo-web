@@ -123,10 +123,13 @@ const HomePage = async () => {
 
           {/* Banner inscripciones */}
           {siteConfig?.inscripcionOpen && (
-            <div className="mt-8 inline-flex items-center gap-2 bg-school-gold/20 border border-school-gold/50 text-school-gold rounded-full px-5 py-2 text-sm font-medium">
+            <a
+              href="#formularios"
+              className="mt-8 inline-flex items-center gap-2 bg-school-gold/20 border border-school-gold/50 text-school-gold rounded-full px-5 py-2 text-base md:text-lg font-bold hover:bg-school-gold/30 transition-colors focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-school-gold"
+            >
               <span className="w-2 h-2 bg-school-gold rounded-full animate-pulse" />
               {siteConfig.inscripcionText || 'Inscripciones abiertas'}
-            </div>
+            </a>
           )}
         </div>
       </section>
@@ -262,20 +265,22 @@ const HomePage = async () => {
               </a>
 
               {/* Botones descarga */}
-              {homeButtons.map((btn, i) => (
-                <a
-                  key={i}
-                  href={toDownloadUrl(btn.fileUrl, btn.downloadName)}
-                  download={btn.downloadName || btn.label}
-                  className={`group flex items-center gap-3 ${BUTTON_COLORS[btn.color] ?? BUTTON_COLORS.sky} text-white rounded-xl px-5 py-4 font-semibold text-sm transition-colors shadow-sm`}
-                >
-                  <svg className="w-5 h-5 flex-shrink-0 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                  </svg>
-                  <span className="flex-1 leading-snug">{btn.label}</span>
-                </a>
-              ))}
+              <div id="formularios" className="flex flex-col gap-4 scroll-mt-28">
+                {homeButtons.map((btn, i) => (
+                  <a
+                    key={i}
+                    href={toDownloadUrl(btn.fileUrl, btn.downloadName)}
+                    download={btn.downloadName || btn.label}
+                    className={`group flex items-center gap-3 ${BUTTON_COLORS[btn.color] ?? BUTTON_COLORS.sky} text-white rounded-xl px-5 py-4 font-semibold text-sm transition-colors shadow-sm`}
+                  >
+                    <svg className="w-5 h-5 flex-shrink-0 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    <span className="flex-1 leading-snug">{btn.label}</span>
+                  </a>
+                ))}
+              </div>
             </div>
 
             {/* ── COL DERECHA: Formulario de contacto ── */}
