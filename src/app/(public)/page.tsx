@@ -125,9 +125,9 @@ const HomePage = async () => {
           {siteConfig?.inscripcionOpen && (
             <a
               href="#formularios"
-              className="mt-8 inline-flex items-center gap-2 bg-school-gold/20 border border-school-gold/50 text-school-gold rounded-full px-5 py-2 text-base md:text-lg font-bold hover:bg-school-gold/30 transition-colors focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-school-gold"
+              className="mt-8 inline-flex items-center gap-2 bg-red-600 border border-red-400 text-white rounded-full px-5 py-2 text-base md:text-lg font-bold hover:bg-red-700 transition-colors focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-red-500"
             >
-              <span className="w-2 h-2 bg-school-gold rounded-full animate-pulse" />
+              <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
               {siteConfig.inscripcionText || 'Inscripciones abiertas'}
             </a>
           )}
