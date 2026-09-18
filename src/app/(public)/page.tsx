@@ -134,7 +134,9 @@ const HomePage = async () => {
 
           {/* Redes sociales */}
           {(siteConfig?.facebookUrl || siteConfig?.instagramUrl) && (
-            <div className="mt-6 flex items-center justify-center gap-4">
+            <div className="mt-10 flex flex-col items-center gap-3">
+              <p className="text-sm font-semibold text-blue-100">Visitá nuestras redes sociales</p>
+              <div className="flex items-center justify-center gap-4">
               {siteConfig.facebookUrl && (
                 <a
                   href={siteConfig.facebookUrl}
@@ -161,6 +163,7 @@ const HomePage = async () => {
                   </svg>
                 </a>
               )}
+              </div>
             </div>
           )}
         </div>
