@@ -15,7 +15,11 @@ const PublicLayout = async ({ children }: PublicLayoutProps) => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Navbar logoUrl={config?.logoUrl ?? null} schoolName={config?.schoolName ?? 'Instituto San Pablo'} groups={navTree} />
+      <Navbar
+        logoUrl={config?.logoUrl ?? null}
+        schoolName={config?.schoolName ?? 'Instituto San Pablo'}
+        groups={navTree}
+      />
       <main className="flex-1">{children}</main>
       <Footer
         schoolName={config?.schoolName}
